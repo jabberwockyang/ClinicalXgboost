@@ -27,6 +27,11 @@ def main(filepath, target_column, log_dir, params,
     result_list = []
     for k in label_toTrain:
         for sequence_id in [0]:
+            result_dir = f'{log_dir}/{k}/result/{sequence_id}'
+            final_marker = os.path.join(result_dir, 'feature_importance.png')
+            if os.path.exists(final_marker):
+                logger.info(f"Model already trained for {k}")
+                continue
             X, y, sample_weight = preprocess_data(data, target_column, 
                                                 scale_factor,log_transform, 
                                                 groupingparams, 

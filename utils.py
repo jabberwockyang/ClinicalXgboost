@@ -9,6 +9,8 @@ import numpy as np
 import json
 from loguru import logger
 import itertools 
+import seaborn as sns
+import re
 
 # 数据加载
 def load_data(filepath):
@@ -150,7 +152,9 @@ def plot_feature_importance(model, savepath):
     importance_df = pd.concat(dflist, axis=1)
     importance_df['feature'] = importance_df.index  
     importance_df.to_csv(os.path.join(savepath, 'feature_importance.csv'), index=False)
-
+    if importance_df.empty:
+        print("No feature importance data available to plot.")
+        return
     importance_df = importance_df.sort_values('weight', ascending=False)
     #scale to 0-1
     for col in ['weight', 'total_gain', 'total_cover', 'gain', 'cover']:
@@ -326,3 +330,28 @@ def custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform):
     elif  custom_metric_key == None:
         return None
     
+def plot_roc_summary(json_file, outdir):
+    with open(json_file, 'r') as f:
+        results = json.load(f)
+    alllist = []
+    paramresults = [r['paramresult'] for r in results]
+    for paramresult in paramresults:
+        alllist.extend(paramresult)
+    df = pd.DataFrame(alllist)
+    df.to_csv(json_file.replace('.json', '.csv'), index=False)
+    # plot dot plot max_roc_auc in different group x axis is group y axis is max_roc_auc
+    # different objective with different color
+    df['max_roc_auc'] = df['max_roc_auc'].astype(float)
+    uniquegroups = df['group'].unique() 
+    orderedlist = sorted(uniquegroups, key = lambda x: int(re.split(r'[-+]', x)[0] if re.match(r'^\d', x) else 9999))
+    df['group'] = pd.Categorical(df['group'], categories = orderedlist, ordered = True)
+
+    plt.figure(figsize=(6, 5))
+    # violinplot with dots  
+    sns.violinplot(data = df, x = 'group', y = 'max_roc_auc')
+    sns.stripplot(data = df, x = 'group', y = 'max_roc_auc', color = 'orange', size = 6, jitter = 0.25)
+    plt.xlabel('group')
+    plt.ylabel('max_roc_auc')
+    plt.title('max_roc_auc in different group')
+    plt.savefig(os.path.join(outdir, 'max_roc_auc.png'))
+    plt.close()
