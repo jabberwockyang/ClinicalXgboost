@@ -34,3 +34,12 @@
     ```
 
 3. 选取最优模型，评估模型性能，描述变量重要性
+    
+    ```bash
+    conda activate nni
+    cd ClinicalXgboost
+    python3 train_grouping.py --config grouping.yaml
+
+    python3 importance.py --repodir /root/ClinicalXgboost/gr_explog/{exp_id}_default_top7
+    python3 plt_roc_summary.py
+    ```

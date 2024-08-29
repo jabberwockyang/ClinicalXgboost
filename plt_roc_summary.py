@@ -29,8 +29,7 @@ def plot_roc_summary(json_file):
     plt.savefig(json_file.replace('.json', '_roc_auc.png'))
 
 if __name__ == '__main__':
-    f = ['/mnt/yangyijun/clinicalML/project_240729/ml/240818/explog/vofuw0ar_default_top25/vofuw0ar_results.json',
-         '/mnt/yangyijun/clinicalML/project_240729/ml/240818/explog/vodum0ar_roc_auc_top25/vofuw0ar_results.json'
+    f = ['/root/ClinicalXgboost/gr_explog/3eQbjfcG_default_top7/3eQbjfcG_results.json'
 ]
     for json_file in f:
         plot_roc_summary(json_file) 

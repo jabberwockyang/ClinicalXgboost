@@ -1,6 +1,6 @@
 nni:
   exp_stp: 'nni2_explog'
-  best_exp_id: ''
+  best_exp_id: '3eQbjfcG'
   metric_to_optimize: 
     - ["default", "minimize"]
   number_of_trials: 7
@@ -8,7 +8,7 @@ train:
   exp_stp: 'gr_explog'
   filepath: 'output/dataforxgboost.csv'
   target_column: 'VisitDuration'
-  dvpath: VariablesImportance/4wkoauh9_default_top7_fromnni/feature_importance_summary.json
+  dvpath: VariablesImportance/ZpoUyrIC_default_top7_fromnni/feature_importance_summary.json
   grouping_parameter_id: '1'
   groupingparams: 
     bins: [0, 2, 6, 12, 25, 55, 150]

@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "EosinophilsPercentage_Avg",
+            "WhiteBloodCellCount_Max",
+            "FirstVisitAge",
+            "CReactiveProtein_Min",
+            "AbsoluteNeutrophilCount_Max",
+            "CReactiveProtein_Avg",
+            "WhiteBloodCellCount_Avg",
+            "PlateletCount_Avg",
+            "MeanCorpuscularHemoglobin_Max",
+            "EosinophilsPercentage_Max",
+            "PlateletCount_Min",
+            "PlateletCount_Max",
+            "BasophilsPercentage_Avg",
+            "NeutrophilsPercentage_Max",
+            "LymphocytesPercentage_Max"
+        ]
+    }
+]

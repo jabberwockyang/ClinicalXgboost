@@ -132,8 +132,8 @@ if __name__ == "__main__":
 
     # 实验日志目录
     results = []
-    for best_param_id, best_params in ls_of_params:
-        foldername = best_exp_id+ '_' + best_param_id + '_' + train_config['grouping_parameter_id']
+    for best_param_id, best_params, sequence_ids in ls_of_params:
+        foldername = str(best_exp_id)+ '_' + str(best_param_id) + '_' + str(train_config['grouping_parameter_id'])
         log_dir = f'{current_exp_stp}/{experiment_id}/{foldername}'
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)

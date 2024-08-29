@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "TotalThyroxine_Avg",
+            "Hematocrit_Avg",
+            "EosinophilsPercentage_Avg_div_CReactiveProtein_Avg",
+            "Gender",
+            "EosinophilsPercentage_Avg_div_CReactiveProtein_Min",
+            "LymphocytesPercentage_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "ThyroidStimulatingHormone_Avg",
+            "MonocytesPercentage_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MeanPlateletVolume_Avg",
+            "LymphocytesPercentage_Max",
+            "MeanCorpuscularVolume_Avg",
+            "PlateletCount_Avg_div_NeutrophilsPercentage_Max"
+        ]
+    }
+]
