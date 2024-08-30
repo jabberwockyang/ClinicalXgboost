@@ -24,6 +24,7 @@ def LoadData(repodir):
             df = pd.read_csv(df_path)
             df['group'] = label
             df['param_id'] = folder
+            df['sequence_ids'] = '0'
             dflist.append(df)
 
     df = pd.concat(dflist, axis=0)

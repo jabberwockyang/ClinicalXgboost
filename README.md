@@ -38,8 +38,6 @@
     ```bash
     conda activate nni
     cd ClinicalXgboost
-    python3 train_grouping.py --config grouping.yaml
-
-    python3 importance.py --repodir /root/ClinicalXgboost/gr_explog/{exp_id}_default_top7
-    python3 plt_roc_summary.py
+    for yml in grouping_*.yaml; do python3 train_grouping.py --config $yml; done
+    for folder in gr_explog/*; do python3 importance.py --repodir $folder; done
     ```

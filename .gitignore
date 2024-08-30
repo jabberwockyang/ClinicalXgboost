@@ -1,3 +1,6 @@
-nni1_explog/*
-nni2_explog/*
-gr_explog/*
+nni1_explog
+nni2_explog
+nni3_explog
+nni4_explog
+gr_explog
+.vscode

@@ -8,6 +8,6 @@ tuner:
   name: TPE
   classArgs:
     optimize_mode: minimize
-trialCommand: python3 train_nni.py --filepath output/dataforxgboost.csv --target_column VisitDuration --exp_dir nni1_explog --groupingparams grouping_params.yml
+trialCommand: python3 train_nni.py --filepath output/dataforxgboost.csv --target_column VisitDuration --exp_dir nni1_explog --groupingparams groupingsetting.yml
 trialCodeDirectory: .
 experimentWorkingDirectory: nni1_explog

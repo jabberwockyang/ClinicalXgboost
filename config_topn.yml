@@ -1,0 +1,13 @@
+experimentName: xgboost_tuning
+trialConcurrency: 1
+maxTrialNumber: 3600
+trainingService:
+  platform: local
+searchSpaceFile: search_space_topn.json
+tuner:
+  name: TPE
+  classArgs:
+    optimize_mode: minimize
+trialCommand: python3 train_nni.py --filepath output/dataforxgboost.csv --target_column VisitDuration --exp_dir nni4_explog --groupingparams groupingsetting.yml --importance_sorting VariablesImportance/3eQbjfcG_default_top25/feature_importance_summary.csv
+trialCodeDirectory: .
+experimentWorkingDirectory: nni4_explog 

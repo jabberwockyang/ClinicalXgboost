@@ -8,6 +8,6 @@ tuner:
   name: TPE
   classArgs:
     optimize_mode: minimize
-trialCommand: python3 train_nni.py --filepath output/dataforxgboost.csv --target_column VisitDuration --exp_dir nni2_explog --feature_derivation VariablesImportance/ZpoUyrIC_default_top7_fromnni/feature_importance_summary.json --groupingparams grouping_params.yml 
+trialCommand: python3 train_nni.py --filepath output/dataforxgboost.csv --target_column VisitDuration --exp_dir nni2_explog --feature_derivation VariablesImportance/ZpoUyrIC_default_top7_fromnni/feature_importance_summary.json --groupingparams groupingsetting.yml 
 trialCodeDirectory: .
 experimentWorkingDirectory: nni2_explog 

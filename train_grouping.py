@@ -9,19 +9,20 @@ import json
 from loguru import logger
    
 from best_params import opendb, get_best_params
-from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, LoadFeatures
+from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, LoadFeatures, sorted_features_list
 
 
 # 主函数
 def main(filepath, target_column, log_dir, params, 
          groupingparams: Dict[str, List[str]] , label_toTrain: List[str],
-         features_to_use = None):
+         features_for_deri = None, sorted_features = None):
 
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     custom_metric_key = params.pop('custom_metric')
     num_boost_round = params.pop('num_boost_round')
     early_stopping_rounds = params.pop('early_stopping_rounds')
+    topn = params.pop('topn', None)
     data = load_data(filepath)
 
     result_list = []
@@ -36,7 +37,9 @@ def main(filepath, target_column, log_dir, params,
                                                 scale_factor,log_transform, 
                                                 groupingparams, 
                                                 pick_key = k,
-                                                feature_derivation = features_to_use)
+                                                feature_derivation = features_for_deri,
+                                                topn = topn,
+                                                sorted_features = sorted_features)
             if X.shape[0] == 0:
                 logger.info(f"No data for {k}")
                 continue
@@ -127,7 +130,8 @@ if __name__ == "__main__":
         os.makedirs(current_exp_stp)
     filepath = train_config['filepath']
     target_column = train_config['target_column']
-    features_to_use = LoadFeatures(train_config['dvpath'])
+    features_for_deri = LoadFeatures(train_config['dvpath'])
+    sorted_features = sorted_features_list(train_config['importance_sorting'])
     
     # 分组参数
     label_toTrain = train_config['label_toTrain']
@@ -147,7 +151,7 @@ if __name__ == "__main__":
         paramresult = main(filepath, target_column, log_dir, 
                            best_params, 
                            groupingparams, label_toTrain,
-                           features_to_use)
+                           features_for_deri, sorted_features)
         newobj = {
             'best_param_id': best_param_id,
             'best_params': best_params,

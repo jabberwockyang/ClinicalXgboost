@@ -36,12 +36,31 @@ def LoadFeatures(filepath):
     alldata = [item for item in importancedata if item['label'] == 'all'][0]
     return alldata['top_n']
 
+def sorted_features_list(importance_sorting_filepath):
+    if importance_sorting_filepath is None:
+        return None
+    importance_df = pd.read_csv(importance_sorting_filepath)
+    # group by feature and average weight
+    # rename Feature to feature and Importance to weight
+    importance_df = importance_df.rename(columns={'Feature': 'feature'})
+    importance_df = importance_df.rename(columns={'Importance': 'weight'})
+    # get feature and weight
+    importance_df = importance_df[['feature', 'weight']]   
+    # group by feature and average weight
+    importance_df = importance_df.groupby('feature').mean().reset_index()
+    # sort by weight from large to small
+    importance_df = importance_df.sort_values(by='weight', ascending=False)
+    return importance_df['feature'].tolist()
+    
+
 # 数据预处理
 def preprocess_data(df, target_column, 
                     scale_factor,log_transform, 
                     groupingparams: Dict[str, List[str]],
                     pick_key = '0-2', 
-                    feature_derivation = None):
+                    feature_derivation = None,
+                    topn = None, 
+                    sorted_features = None):
     ## filtering data
     # remove rows with missing values in all result columns
     with open ('ExaminationItemClass_ID.json', 'r') as json_file:
@@ -98,9 +117,20 @@ def preprocess_data(df, target_column,
             new_col_name = f'{feat1}_div_{feat2}'
             df[new_col_name] = df[feat1] / (df[feat2] + 1e-10)
 
+        print(f"Number of derived features: {len(combinations)}")
+    
+    # feature filtering by importance sorting
+    features_to_use = [feat for feat in df.columns if feat not in [target_column, 'sample_weight','agegroup', 'visitdurationgroup']]
+    if topn > 0:
+        # rank features to use by sorted_features if not in features_to_use then place at the end
+        features_to_use = [feat for feat in sorted_features if feat in features_to_use]  + [feat for feat in features_to_use if feat not in sorted_features]
+        features_to_use = features_to_use[:topn]
+    else:
+        pass
+
     print(df.head())
     # Generate data for training
-    X = df.drop(columns=[target_column, 'sample_weight','agegroup', 'visitdurationgroup'])
+    X = df[features_to_use]
     y = df[target_column]
     # scaled by scale_factor linearly
     y = np.round(y / scale_factor) + 1
