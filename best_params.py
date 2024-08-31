@@ -72,7 +72,9 @@ def get_best_params(df, metric_to_optimize:list=[('roc_auc',"maximize")], number
             sequence_ids = param_rows['sequenceId'].tolist()
             best_parameter_id_list.append((param_id, params, sequence_ids))
 
-        
+    print(f"""best params found: {len(best_parameter_id_list)}
+print top 5 best params: {best_parameter_id_list[:5]}
+""")
     return best_parameter_id_list
 
 if __name__ == '__main__':

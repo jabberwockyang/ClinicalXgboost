@@ -5,7 +5,7 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 from best_params import opendb, get_best_params
-from utils import plot_roc_summary
+from utils import plot_roc_summary, parse_gr_results, parse_nni_results
 
 # todo 去除离群值
 
@@ -40,7 +40,6 @@ def LoadDataFromNNI(nnidir, metric_to_optimize: list=[('default','minimize')], n
     dflist = []
     for param_id, _, sequence_ids in ls_of_params:
         for sequence_id in sequence_ids:
-            print(sequence_id)
             bestparamfolder = os.path.join(nnidir, 'result', str(sequence_id))
             dfpath = os.path.join(bestparamfolder, 'feature_importance.csv')
             df = pd.read_csv(dfpath)
@@ -130,7 +129,7 @@ def PlotImportance(df, labels, outdir,n=15):
 def argparser():
     import argparse
     parser = argparse.ArgumentParser(description='Plot feature importance')
-    parser.add_argument('--repodir', type=str, default = None, help='repo directory')
+    parser.add_argument('--grdir', type=str, default = None, help='repo directory')
     parser.add_argument('--nnidir', type=str, default = None, help='nni directory')
     parser.add_argument('--metric', type=str, default = None, help='metric to optimize')
     parser.add_argument('--minimize', type=bool, default = None, help='minimize or maximize')
@@ -141,36 +140,41 @@ if __name__ == '__main__':
     with open ('ExaminationItemClass_ID.json', 'r') as json_file:
         ExaminationItemClass = json.load(json_file)
     args = argparser()
-    repodir = args.repodir
+    grdir = args.grdir
     nnidir = args.nnidir
     
 
-    # RefreshFeatureImportance(repodir)
-    if repodir:
-        outdir = os.path.join('VariablesImportance', os.path.basename(repodir))
+    # RefreshFeatureImportance(grdir)
+    if grdir:
+        # join variablesImportance folder with the dir of grdir and basename of grdir
+        outdir = os.path.join('VariablesImportance', os.path.basename(os.path.dirname(grdir)), os.path.basename(grdir))
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         
         # plot ROC Summary
-        jsonfilepath = [p for p in os.listdir(repodir) if p.endswith('_results.json')][0]
-        if os.path.exists(os.path.join(repodir, jsonfilepath)):
-            df, labels = LoadData(repodir)
-            plot_roc_summary(os.path.join(repodir, jsonfilepath), outdir)
+        jsonfilepath = [p for p in os.listdir(grdir) if p.endswith('_results.json')][0]
+        if os.path.exists(os.path.join(grdir, jsonfilepath)):
+            df, labels = LoadData(grdir)
+            rocdf = parse_gr_results(os.path.join(grdir, jsonfilepath))
+            plot_roc_summary(rocdf, outdir)
         else:
             print(f"ROC summary file {jsonfilepath} not found")
             df = None
             labels = None
-            
-
         
-    elif nnidir:
+    elif nnidir and args.metric and args.minimize and args.number_of_trials:
         nnidir = os.path.realpath(nnidir) 
-        outdir = os.path.join('VariablesImportance', f"{os.path.basename(nnidir)}_{args.metric}_top{args.number_of_trials}_fromnni")
+        print(f"nnidir: {nnidir}")
+        outdir = os.path.join('VariablesImportance', os.path.basename(os.path.dirname(nnidir)),  f"{os.path.basename(nnidir)}_{args.metric}_top{args.number_of_trials}_fromnni")
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         m = 'minimize' if args.minimize else 'maximize'
         df, labels = LoadDataFromNNI(nnidir, metric_to_optimize=[(args.metric, m)], number_of_trials=args.number_of_trials)
-
+        rocdf = parse_nni_results(os.path.join(nnidir, 'paramandresult.jsonl'), args.metric, args.minimize, args.number_of_trials)
+        plot_roc_summary(rocdf, outdir)
+    else:
+        print("Please provide repodir or nnidir, metric, minimize, number_of_trials")
+        exit(1)
     if df is not None:
         top_n_list = PlotImportance(df, labels, outdir)
         df.to_csv(os.path.join(outdir, 'feature_importance_summary.csv'), index=False)

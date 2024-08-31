@@ -1,6 +1,6 @@
 nni:
   exp_stp: 'nni3_explog'
-  best_exp_id: 'Tplfv6G1'
+  best_exp_id: 'VkOlLJjr'
   metric_to_optimize: 
     - ["default", "minimize"]
   number_of_trials: 7

@@ -1,28 +1,96 @@
-# nni and determine top variables with importance
 conda activate nni
 cd /root/ClinicalXgboost
 
+
+# nni and determine top variables with importance
 nnictl create --config config_nni1.yml --port 8081 # ZpoUyrIC  nnictl resume ZpoUyrIC --port 8081
-python3 importance.py --nnidir nni1_explog/ZpoUyrIC --metric default --minimize True --number_of_trials 7
+for expid in nni1_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
+# Loop through YAML files and run train_grouping.py for each experiment
+for yml in grouping_nni1_*.yaml; do
+    for expid in nni1_explog/*; do
+        base_expid=$(basename "$expid")
+        python3 train_grouping.py --config "$yml" --expid "$base_expid"
+    done
+done
+
+# Run importance.py for each grouping experiment folder
+for expid in nni1_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --repodir "$grfolder"
+    done
+done
 
 # nni with derived variables
 nnictl create --config config_dv.yml --port 8081 # 3eQbjfcG  nnictl resume 3eQbjfcG --port 8081
-python3 importance.py --nnidir nni2_explog/3eQbjfcG --metric default --minimize True --number_of_trials 7
+for expid in nni2_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
+# Loop through YAML files and run train_grouping.py for each experiment
+for yml in grouping_nni2_*.yaml; do
+    for expid in nni2_explog/*; do
+        base_expid=$(basename "$expid")
+        python3 train_grouping.py --config "$yml" --expid "$base_expid"
+    done
+done
+
+# Run importance.py for each grouping experiment folder
+for expid in nni2_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --repodir "$grfolder"
+    done
+done
+
+
 
 # nni with derived variables and topn
 nnictl create --config config_dv_topn.yml --port 8081 # 
-python3 importance.py --nnidir nni3_explog/Tplfv6G1 --metric default --minimize True --number_of_trials 7
+for expid in nni3_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
+# Loop through YAML files and run train_grouping.py for each experiment
+for yml in grouping_nni3_*.yaml; do
+    for expid in nni3_explog/*; do
+        base_expid=$(basename "$expid")
+        python3 train_grouping.py --config "$yml" --expid "$base_expid"
+    done
+done
+
+# Run importance.py for each grouping experiment folder
+for expid in nni3_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --repodir "$grfolder"
+    done
+done
+
 
 # nni with topn
-nnictl create --config config_topn.yml --port 8081
-python3 importance.py --nnidir nni4_explog/lWHoRrqJ --metric default --minimize True --number_of_trials 7
+nnictl create --config config_topn.yml --port 7860
+for expid in nni4_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
 
-# train with grouped data in top 7 params
-for yml in grouping_nni3_*_top7.yaml; do python3 train_grouping.py --config $yml; done
-for folder in gr_explog/*; do python3 importance.py --repodir $folder; done
+# Loop through YAML files and run train_grouping.py for each experiment
+for yml in grouping_nni4_*.yaml; do
+    for expid in nni4_explog/*; do
+        base_expid=$(basename "$expid")
+        python3 train_grouping.py --config "$yml" --expid "$base_expid"
+    done
+done
 
+# Run importance.py for each grouping experiment folder
+for expid in nni4_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --repodir "$grfolder"
+    done
+done
 
 
 
 nnictl stop -a
 nnictl resume 4wkoauh9
+
+
+#  Stopping experiment SyguB7Fb
+# INFO:  Stop experiment success.
+# INFO:  Stopping experiment n60M47dW
+# INFO:  Stop experiment success.
+# SyguB7Fb  n60M47dW topn 参数 50-200 
+# 0T2GXABC  lcMYyo0V topn 参数 0.1-1

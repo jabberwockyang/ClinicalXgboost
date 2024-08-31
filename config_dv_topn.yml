@@ -1,5 +1,5 @@
 experimentName: xgboost_tuning
-trialConcurrency: 1
+trialConcurrency: 15
 maxTrialNumber: 3600
 trainingService:
   platform: local

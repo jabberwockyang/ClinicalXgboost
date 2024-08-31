@@ -98,6 +98,7 @@ def main(filepath, target_column, log_dir, params,
 def parse_args():
     parser = argparse.ArgumentParser(description='Run XGBoost Model Training with Grouping Parameters')
     parser.add_argument('--config', type=str, required=True, help='Path to the configuration YAML file')
+    parser.add_argument('--expid', type=str, default=None, help='Experiment ID of nni results to run grouped training')
     
     args = parser.parse_args()
     return args
@@ -115,7 +116,8 @@ if __name__ == "__main__":
 
     # 读取nni实验中最佳超参数
     former_exp_stp = nni_config['exp_stp']
-    best_exp_id = nni_config['best_exp_id']
+    # if expid not provided in arg then use the one in config
+    best_exp_id = args.expid if args.expid else nni_config['best_exp_id']
     metric_to_optimize = nni_config['metric_to_optimize']
     number_of_trials = nni_config['number_of_trials']
 

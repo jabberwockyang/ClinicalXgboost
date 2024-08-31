@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "Gender",
+            "RedBloodCellCount_Avg",
+            "AbsoluteLymphocyteCount_Avg",
+            "ImmunoglobulinE_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Max",
+            "TotalTriiodothyronine_Avg",
+            "AbsoluteMonocyteCount_Min",
+            "Total25HydroxyVitaminD_Avg",
+            "FreeThyroxine_Avg",
+            "AntiScl70_Avg",
+            "Plateletcrit_Min",
+            "Hemoglobin_Min",
+            "DogDander_Avg",
+            "EggWhite_Avg",
+            "RyeGrass_Avg"
+        ]
+    }
+]

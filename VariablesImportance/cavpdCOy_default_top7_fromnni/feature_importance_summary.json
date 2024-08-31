@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "LymphocytesPercentage_Avg",
+            "Hematocrit_Avg",
+            "MeanPlateletVolume_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MonocytesPercentage_Avg",
+            "LymphocytesPercentage_Max",
+            "MeanCorpuscularVolume_Max",
+            "TotalThyroxine_Avg",
+            "PlateletCount_Avg",
+            "RedCellDistributionWidthCV_Avg",
+            "ImmunoglobulinE_Avg",
+            "EosinophilsPercentage_Min",
+            "MeanPlateletVolume_Min"
+        ]
+    }
+]

@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "Hematocrit_Avg",
+            "FirstVisitAge",
+            "AbsoluteNeutrophilCount_Max_div_NeutrophilsPercentage_Max",
+            "EosinophilsPercentage_Avg_div_WhiteBloodCellCount_Max",
+            "EosinophilsPercentage_Avg_div_CReactiveProtein_Min",
+            "AbsoluteNeutrophilCount_Max",
+            "Plateletcrit_Min",
+            "LymphocytesPercentage_Avg",
+            "PlateletCount_Avg_div_PlateletCount_Min",
+            "TotalThyroxine_Avg",
+            "MeanCorpuscularVolume_Max",
+            "EosinophilsPercentage_Avg_div_LymphocytesPercentage_Max",
+            "CReactiveProtein_Min_div_BasophilsPercentage_Avg",
+            "WhiteBloodCellCount_Avg_div_BasophilsPercentage_Avg",
+            "WhiteBloodCellCount_Max_div_FirstVisitAge"
+        ]
+    }
+]

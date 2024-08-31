@@ -9,6 +9,7 @@ train:
   filepath: 'output/dataforxgboost.csv'
   target_column: 'VisitDuration'
   dvpath:
+  importance_sorting:
   grouping_parameter_id: '1'
   groupingparams: 
     bins: [0, 2, 6, 12, 25, 55, 150]

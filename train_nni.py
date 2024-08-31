@@ -22,7 +22,7 @@ def nnimain(filepath, target_column, log_dir,
     # Add GPU parameter
     params["device"] = "cuda"
     params["tree_method"] = "hist"
-
+    paramandreuslt = params.copy()
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     custom_metric_key = params.pop('custom_metric')
@@ -73,7 +73,6 @@ def nnimain(filepath, target_column, log_dir,
         os.makedirs(result_dir)
     loss, max_roc_auc, max_prerec_auc = evaluate_model(model, dtest, result_dir, scale_factor, log_transform)
     # 保存实验 id 超参数 和 结果 # 逐行写入
-    paramandreuslt = params.copy()
     paramandreuslt['loss'] = loss
     paramandreuslt['max_roc_auc'] = max_roc_auc
     paramandreuslt['max_prerec_auc'] = max_prerec_auc

@@ -121,12 +121,18 @@ def preprocess_data(df, target_column,
     
     # feature filtering by importance sorting
     features_to_use = [feat for feat in df.columns if feat not in [target_column, 'sample_weight','agegroup', 'visitdurationgroup']]
-    if topn > 0:
-        # rank features to use by sorted_features if not in features_to_use then place at the end
-        features_to_use = [feat for feat in sorted_features if feat in features_to_use]  + [feat for feat in features_to_use if feat not in sorted_features]
-        features_to_use = features_to_use[:topn]
-    else:
-        pass
+    if topn > 1: # topn is an integer
+        topn = topn
+    elif topn < 0: # topn is -1 use all features
+        topn = len(features_to_use)
+    else: # topn is a ratio between 0 and 1
+        topn = round(len(features_to_use) * topn) 
+    # rank features to use by sorted_features if not in features_to_use then place at the end
+    features_to_use = [feat for feat in sorted_features if feat in features_to_use]  + [feat for feat in features_to_use if feat not in sorted_features]
+    features_to_use = features_to_use[:topn]
+    print(f"Number of features used: {len(features_to_use)}")
+    print(f"Features used: {features_to_use[:5]} ...")
+
 
     print(df.head())
     # Generate data for training
@@ -359,16 +365,45 @@ def custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform):
     
     elif  custom_metric_key == None:
         return None
-    
-def plot_roc_summary(json_file, outdir):
-    with open(json_file, 'r') as f:
+
+def parse_gr_results(gr_results):
+    '''
+    input: jsonfile path
+    output: dataframe with max_roc_auc and group
+
+    '''
+    with open(gr_results, 'r') as f:
         results = json.load(f)
     alllist = []
     paramresults = [r['paramresult'] for r in results]
     for paramresult in paramresults:
         alllist.extend(paramresult)
     df = pd.DataFrame(alllist)
-    df.to_csv(json_file.replace('.json', '.csv'), index=False)
+    df= df[['group', 'max_roc_auc']]
+    return df
+
+def parse_nni_results(nni_results, metric:str, minimize:bool, number_of_trials:int):
+    '''
+    input: jsonfile path
+    output: dataframe with max_roc_auc and group
+
+    '''
+    if metric == 'default':
+        metric = 'loss'
+    with open(nni_results, 'r') as f:
+        results = [json.loads(line) for line in f.readlines()]
+    df = pd.DataFrame({
+    'max_roc_auc': [r['max_roc_auc'] for r in results],
+    'metric': [r[metric] for r in results],
+    'group': ['all' for r in results],
+    })
+    df = df.sort_values(by='metric', ascending=minimize)
+    df = df.head(number_of_trials)
+    df.drop(columns=['metric'], inplace=True)
+    return df
+
+def plot_roc_summary(df, outdir):
+
     # plot dot plot max_roc_auc in different group x axis is group y axis is max_roc_auc
     # different objective with different color
     df['max_roc_auc'] = df['max_roc_auc'].astype(float)
