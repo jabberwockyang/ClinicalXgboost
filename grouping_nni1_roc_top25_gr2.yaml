@@ -1,0 +1,18 @@
+nni:
+  exp_stp: 'nni1_explog'
+  best_exp_id: 'ZpoUyrIC'
+  metric_to_optimize: 
+    - ["roc_auc", "maximize"]
+  number_of_trials: 25
+train:
+  exp_stp: 'gr_explog'
+  filepath: 'output/dataforxgboost.csv'
+  target_column: 'VisitDuration'
+  dvpath:
+  importance_sorting:
+  grouping_parameter_id: '2'
+  groupingparams: 
+    bins: [0, 2, 6, 12, 25, 55, 65, 75, 85, 150]
+    labels: ['0-2', '2-6', '6-12', '12-25', '25-55', '55-65', '65-75', '75-85', '85+']
+  label_toTrain: ['0-2', '2-6', '6-12', '12-25', '25-55', '55-65', '65-75', '75-85', '85+', 'all']
+

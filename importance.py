@@ -154,16 +154,11 @@ if __name__ == '__main__':
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         logger.info(f"outdir: {outdir}")
-        # plot ROC Summary
-        jsonfilepath = [p for p in os.listdir(grdir) if p.endswith('_results.json')][0]
-        if os.path.exists(os.path.join(grdir, jsonfilepath)):
-            df, labels = LoadData(grdir)
-            rocdf = parse_gr_results(os.path.join(grdir, jsonfilepath))
-            plot_roc_summary(rocdf, outdir)
-        else:
-            logger.error(f"ROC summary file {jsonfilepath} not found")
-            df = None
-            labels = None
+        
+        df, labels = LoadData(grdir)
+        rocdf = parse_gr_results(grdir)
+        plot_roc_summary(rocdf, outdir)
+
         
     elif nnidir and args.metric and args.minimize and args.number_of_trials:
         nnidir = os.path.realpath(nnidir) 

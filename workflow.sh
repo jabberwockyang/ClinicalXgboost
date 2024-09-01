@@ -94,3 +94,21 @@ nnictl resume 4wkoauh9
 
 # SyguB7Fb  n60M47dW topn 参数 50-200 
 # 0T2GXABC  lcMYyo0V topn 参数 0.1-1
+
+
+# to run importance for all gr_explog
+for grfolder in gr_explog/*; do
+    python3 importance.py --grdir "$grfolder"
+done
+
+# summary in variablesimportance shows no benefit of feature derivation and subsequent topn 
+# use nni1 results for further analysis
+
+# try different grouping strategies
+
+for yml in grouping_nni1_*_gr2.yaml; do
+    for expid in nni1_explog/*; do
+        base_expid=$(basename "$expid")
+        python3 train_grouping.py --config "$yml" --expid "$base_expid"
+    done
+done

@@ -25,7 +25,6 @@ def main(filepath, target_column, log_dir, params,
     topn = params.pop('topn', None)
     data = load_data(filepath)
 
-    result_list = []
     for k in label_toTrain:
         for sequence_id in [0]:
             result_dir = f'{log_dir}/{k}/result/{sequence_id}'
@@ -90,8 +89,7 @@ def main(filepath, target_column, log_dir, params,
             # 评估特征重要性
             plot_feature_importance(model, result_dir)
             logger.info(f"Model result saved for {k}")
-            result_list.append(paramandreuslt)
-    return result_list
+            
 
 
 
@@ -124,7 +122,7 @@ if __name__ == "__main__":
     best_db_path = f'{former_exp_stp}/{best_exp_id}/db/nni.sqlite'
     df = opendb(best_db_path)
     ls_of_params = get_best_params(df, metric_to_optimize, number_of_trials)
-    experiment_id = f'{best_exp_id}_{"&".join([m[0] for m in metric_to_optimize])}_top{number_of_trials}'
+    
 
     # 训练数据相关参数
     current_exp_stp = train_config['exp_stp']
@@ -142,12 +140,13 @@ if __name__ == "__main__":
                       'labels': train_config['groupingparams']['labels']}
 
     # 实验日志目录
+    experiment_id = f'{best_exp_id}_{"&".join([m[0] for m in metric_to_optimize])}_top{number_of_trials}_gr{train_config["grouping_parameter_id"]}'
     if not os.path.exists(f'{current_exp_stp}/{experiment_id}'):
         os.makedirs(f'{current_exp_stp}/{experiment_id}')
     topparams = [p[1] for p in ls_of_params]
     with open(f'{current_exp_stp}/{experiment_id}/topparams.json', 'w') as f:
         json.dump(convert_floats(topparams), f, ensure_ascii=False, indent=4)
-    results = []
+   
     for best_param_id, best_params, sequence_ids in ls_of_params:
         foldername = str(best_exp_id)+ '_' + str(best_param_id) + '_' + str(train_config['grouping_parameter_id'])
         log_dir = f'{current_exp_stp}/{experiment_id}/{foldername}'
@@ -155,17 +154,10 @@ if __name__ == "__main__":
             os.makedirs(log_dir)
 
         # 训练模型
-        paramresult = main(filepath, target_column, log_dir, 
+        main(filepath, target_column, log_dir, 
                            best_params, 
                            groupingparams, label_toTrain,
                            features_for_deri, sorted_features)
-        newobj = {
-            'best_param_id': best_param_id,
-            'best_params': best_params,
-            'paramresult': paramresult
-        }
-        results.append(newobj)
-    with open(f'{current_exp_stp}/{experiment_id}/{best_exp_id}_results.json', 'w') as f:
-        json.dump(convert_floats(results), f, ensure_ascii=False, indent=4)
+
 
 

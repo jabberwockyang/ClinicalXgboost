@@ -121,17 +121,24 @@ def preprocess_data(df, target_column,
     
     # feature filtering by importance sorting
     features_to_use = [feat for feat in df.columns if feat not in [target_column, 'sample_weight','agegroup', 'visitdurationgroup']]
-    if topn > 1: # topn is an integer
+    if topn is None:
+        topn = len(features_to_use)
+    elif topn > 1: # topn is an integer
         topn = topn
     elif topn < 0: # topn is -1 use all features
         topn = len(features_to_use)
     else: # topn is a ratio between 0 and 1
         topn = round(len(features_to_use) * topn) 
     # rank features to use by sorted_features if not in features_to_use then place at the end
-    features_to_use = [feat for feat in sorted_features if feat in features_to_use]  + [feat for feat in features_to_use if feat not in sorted_features]
-    features_to_use = features_to_use[:topn]
-    print(f"Number of features used: {len(features_to_use)}")
-    print(f"Features used: {features_to_use[:5]} ...")
+    if sorted_features is not None:
+        features_to_use = [feat for feat in sorted_features if feat in features_to_use]  + [feat for feat in features_to_use if feat not in sorted_features]
+        features_to_use = features_to_use[:topn]
+        print(f"Number of features used: {len(features_to_use)}")
+        print(f"Features used: {features_to_use[:5]} ...")
+    else:
+        features_to_use = features_to_use[:topn]
+        print(f"Number of features used: {len(features_to_use)}")
+        print(f"Features used: {features_to_use[:5]} ...")
 
 
     print(df.head())
@@ -366,20 +373,26 @@ def custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform):
     elif  custom_metric_key == None:
         return None
 
-def parse_gr_results(gr_results):
-    '''
-    input: jsonfile path
-    output: dataframe with max_roc_auc and group
-
-    '''
-    with open(gr_results, 'r') as f:
-        results = json.load(f)
-    alllist = []
-    paramresults = [r['paramresult'] for r in results]
-    for paramresult in paramresults:
-        alllist.extend(paramresult)
-    df = pd.DataFrame(alllist)
-    df= df[['group', 'max_roc_auc']]
+def parse_gr_results(grdir):
+    logger.info(f"Loading data from {grdir}")
+    allfolder = [dir for dir in os.listdir(grdir) if os.path.isdir(os.path.join(grdir, dir))]
+    results_list = []  # Change this to a list
+    logger.info(f"found {len(allfolder)} folders")
+    for folder in allfolder:
+        labels_trained = [dir for dir in os.listdir(os.path.join(grdir, folder)) if os.path.isdir(os.path.join(grdir, folder, dir))]
+        logger.info(f"found {len(labels_trained)} labels in {folder}")
+        for label in labels_trained:
+            df_path = os.path.join(grdir, folder, label,'paramandresult.json')
+            with open(df_path, 'r') as f:
+                results = json.load(f)
+            # Append each result as a dictionary to the list
+            results_list.append({
+                'group': results.get('group', ''),
+                'max_roc_auc': results.get('max_roc_auc', 0)
+            })
+    
+    # Create DataFrame from the list of dictionaries
+    df = pd.DataFrame(results_list)
     return df
 
 def parse_nni_results(nni_results, metric:str, minimize:bool, number_of_trials:int):
