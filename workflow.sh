@@ -87,11 +87,6 @@ done
 
 
 
-nnictl stop -a
-nnictl resume 4wkoauh9
-
-
-
 # SyguB7Fb  n60M47dW topn 参数 50-200 
 # 0T2GXABC  lcMYyo0V topn 参数 0.1-1
 
@@ -105,10 +100,23 @@ done
 # use nni1 results for further analysis
 
 # try different grouping strategies
-
 for yml in grouping_nni1_*_gr2.yaml; do
     for expid in nni1_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
     done
 done
+
+for expid in nni1_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*_gr2; do
+        python3 importance.py --grdir "$grfolder"
+    done
+done
+
+# results show the previous grouping strategy is better
+
+# try boruta
+python3 boruta.py
+
+#during boruta discover problem with imputation run nni1 again and grouping and importance

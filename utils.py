@@ -11,11 +11,18 @@ from loguru import logger
 import itertools 
 import seaborn as sns
 import re
+import yaml
 
 # 数据加载
 def load_data(filepath):
     data = pd.read_csv(filepath)
     return data
+
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
 
 def convert_floats(o):
     if isinstance(o, np.float32):
@@ -67,44 +74,48 @@ def preprocess_data(df, target_column,
         ExaminationItemClass = json.load(json_file)
     namelist = [x[1] for x in ExaminationItemClass['CommonBloodTest']]
     result_cols2 = df.columns[df.columns.str.contains("|".join(namelist))]
+    # remove columns with all NaN values in CommonBloodTest
     df = df.dropna(subset=result_cols2, how='all') 
-    # remove rows with missing values in target column
-    df = df.dropna(subset=[target_column])
-    # remove columns in results_col with only 1 unique value
-    result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
-    df = df.drop(columns=result_cols[df[result_cols].nunique() == 1])
 
-    # Group data by visitdurationgroup and calculate weights
-    df['visitdurationgroup'] = pd.cut(df['VisitDuration'], 
-                                      bins=[0, 42, 365, 1095, 1825,10000], 
-                                      labels=["<6w", "6w-1y", "1-3y", "3-5y", "5y+"], ordered=True)
-    df = df.dropna(subset=['visitdurationgroup'])
-    weights = df['visitdurationgroup'].value_counts(normalize=True)
-    df['sample_weight'] = df['visitdurationgroup'].map(lambda x: 1 / (weights[x] + 1e-10))
+    # remove columns in results_col with only 1 unique value or all NaN
+    result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
+    df = df.drop(columns=result_cols[df[result_cols].nunique() <= 1])
+    other_cols = [col for col in df.columns if col not in result_cols]
+    # remove columns with any NaN values
+    df = df.dropna(subset=other_cols, how='any')
+
 
     # group data by agegroup
     bins = groupingparams['bins']
     labels = groupingparams['labels']
-
-    df = df.assign(agegroup=pd.cut(df['FirstVisitAge'], bins= bins, labels= labels))
-    
+    df = df.assign(agegroup=pd.cut(df['FirstVisitAge'], bins= bins, labels= labels, right=False))
     df['agegroup'] = pd.Categorical(df['agegroup'], categories= labels, ordered=True)
 
-    # Missing value imputation and other preprocessing
+    # Missing value imputation based on agegroup
     warnings.filterwarnings("ignore", category=RuntimeWarning, message="Mean of empty slice")
     result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
-    overall_median = df[result_cols].median()
-    df[result_cols] = df.groupby('agegroup', observed=True)[result_cols].transform(
-        lambda x: x.fillna(x.median() if not np.isnan(x.median()) else overall_median)
-    )
+    for col in result_cols:
+        overall_median = df[col].median()
+        df[col] = df.groupby('agegroup', observed=True)[col].transform(
+            lambda x: x.fillna(x.median() if not np.isnan(x.median()) else overall_median)
+        )
     warnings.filterwarnings("default", category=RuntimeWarning, message="Mean of empty slice")
+
+    # Group data by visitdurationgroup and calculate weights
+    df['visitdurationgroup'] = pd.cut(df['VisitDuration'], 
+                                      bins=[0, 42, 365, 1095, 1825,10000], 
+                                      labels=["<6w", "6w-1y", "1-3y", "3-5y", "5y+"], ordered=True, right=False)
+    df = df.dropna(subset=['visitdurationgroup'])
+    weights = df['visitdurationgroup'].value_counts(normalize=True)
+    df['sample_weight'] = df['visitdurationgroup'].map(lambda x: 1 / (weights[x] + 1e-10))
 
     # subsetting data
     if pick_key != 'all':
         df = df[df['agegroup'] == pick_key]
     else:
         pass
-    # scale the data by min-max 
+
+    # scale the X data by min-max 
     for col in result_cols:
         df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
 
@@ -154,9 +165,12 @@ def preprocess_data(df, target_column,
         y = np.log10(y)
     else:
         y = y
+    
     # get sample_weight
     sample_weight = df['sample_weight']
     logger.info(f"Data for 'agegroup' {pick_key} is ready, X shape: {X.shape}, y shape: {y.shape}")
+
+
     return X, y, sample_weight
 
 
@@ -433,3 +447,31 @@ def plot_roc_summary(df, outdir):
     plt.title('max_roc_auc in different group')
     plt.savefig(os.path.join(outdir, 'max_roc_auc.png'))
     plt.close()
+
+
+def augment_samples(X, y, sample_weight):
+    """
+    Augment samples based on sample weights.
+    
+    Parameters:
+    X (pd.DataFrame): Feature matrix.
+    y (pd.Series): Target variable.
+    sample_weight (pd.Series): Sample weights.
+    
+    Returns:
+    pd.DataFrame, pd.Series: Augmented feature matrix and target variable.
+    """
+    logger.info(f"Augmenting samples with sample weights")
+    X_augmented = []
+    y_augmented = []
+    
+    for i in range(len(sample_weight)):
+        weight = int(np.round(sample_weight.iloc[i]))
+        for _ in range(weight):
+            X_augmented.append(X.iloc[i])
+            y_augmented.append(y.iloc[i])
+    
+    X_augmented = pd.DataFrame(X_augmented, columns=X.columns)
+    y_augmented = pd.Series(y_augmented)
+    
+    return X_augmented, y_augmented

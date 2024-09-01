@@ -3,13 +3,12 @@ import nni
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 import argparse
-import yaml
 import os
 from typing import Dict, List
 import json
    
 from best_params import opendb, get_best_params
-from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, LoadFeatures, sorted_features_list
+from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, LoadFeatures, sorted_features_list, load_config
 
 
 # 主函数
@@ -102,10 +101,6 @@ def argparser():
     args = parser.parse_args()
     return args
 
-def load_config(config_path):
-    with open(config_path, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
 
 if __name__ == "__main__":
     
