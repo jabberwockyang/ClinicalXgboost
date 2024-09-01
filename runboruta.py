@@ -2,29 +2,42 @@
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from boruta import BorutaPy
 import seaborn as sns
-from utils import preprocess_data, load_data, load_config, augment_samples
+from utils import preprocess_data, load_data, load_config, augment_samples, custom_eval_roc_auc_factory
+from best_params import opendb, get_best_params
 
-def main(filepath, target_column, log_dir,groupingparams):
+def main(filepath, target_column, log_dir, groupingparams, params):
+    paramcopy = params.copy()
+    scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
+    log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
+    custom_metric_key = params.pop('custom_metric')
+    n_estimators = params.pop('num_boost_round')
+    topn = params.pop('topn', None)
+    early_stopping_rounds = params.pop('early_stopping_rounds')
     data = load_data(filepath)
-    scale_factor = 2
-    log_transform = "log2"
+    params['reg_alpha'] = params.pop('alpha')
+    params["device"] = "cuda"
+    params["tree_method"] = "hist"
+
     X, y, sample_weight = preprocess_data(data, target_column, 
                                           scale_factor,log_transform, 
                                             groupingparams,
                                             pick_key= 'all',
                                            feature_derivation = None, 
                                            topn=None, sorted_features=None)
+    
     X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
+    
     print(f"Before augmentation: {X_train.shape}, {y_train.shape}")
     X_train, y_train = augment_samples(X_train, y_train, sw_train)
     print(f"After augmentation: {X_train.shape}, {y_train.shape}")
-    # 初始化随机森林模型
-    rf = RandomForestRegressor(n_jobs=6, max_depth=5, random_state=42)
-
+    
+    rf = xgb.XGBRegressor(n_estimators = n_estimators,**params)
+                          
     # 初始化存储特征排名的 DataFrame
     ranking_df = pd.DataFrame(columns=X_train.columns)
 
@@ -33,10 +46,11 @@ def main(filepath, target_column, log_dir,groupingparams):
         print(f"Iteration {i+1}")
         
         # 初始化Boruta特征选择器
-        boruta_selector = BorutaPy(rf, n_estimators='auto', verbose=2, random_state=i, max_iter=50)
+        boruta_selector = BorutaPy(rf, n_estimators=n_estimators, verbose=2, 
+                                   random_state=i, max_iter=25)
         
         # 对训练数据进行特征选择
-        boruta_selector.fit(X_train.values, y_train.values)
+        boruta_selector.fit(X_train, y_train)
         
         # 获取特征排名
         feature_ranks = boruta_selector.ranking_
@@ -71,6 +85,11 @@ if __name__ == "__main__":
     target_column = 'VisitDuration'
     log_dir = 'boruta_explog'
     groupingparams = load_config('groupingsetting.yml')['groupingparams']
-    ranking_df = main(filepath, target_column, log_dir, groupingparams)
+    best_db_path = 'nni1_explog/ZpoUyrIC/db/nni.sqlite'
+    df  = opendb(best_db_path)
+    ls_of_params = get_best_params(df, [('default','minimize')], 1)
+    best_param = ls_of_params[0][1]
+
+    ranking_df = main(filepath, target_column, log_dir, groupingparams, best_param)
     ranking_df.to_csv(os.path.join(log_dir, 'ranking_df.csv'))
     plot_boruta(ranking_df, log_dir)
