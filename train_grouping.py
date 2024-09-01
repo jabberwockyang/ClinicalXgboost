@@ -16,7 +16,7 @@ from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_
 def main(filepath, target_column, log_dir, params, 
          groupingparams: Dict[str, List[str]] , label_toTrain: List[str],
          features_for_deri = None, sorted_features = None):
-
+    paramcopy = params.copy()
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     custom_metric_key = params.pop('custom_metric')
@@ -78,7 +78,7 @@ def main(filepath, target_column, log_dir, params,
                 os.makedirs(result_dir)
             loss, max_roc_auc, max_prerec_auc = evaluate_model(model, dtest, result_dir, scale_factor, log_transform)
             # 保存实验 id 超参数 和 结果 # 逐行写入
-            paramandreuslt = params.copy()
+            paramandreuslt = paramcopy.copy()
             paramandreuslt['group'] = k
             paramandreuslt['loss'] = loss
             paramandreuslt['max_roc_auc'] = max_roc_auc
@@ -142,6 +142,11 @@ if __name__ == "__main__":
                       'labels': train_config['groupingparams']['labels']}
 
     # 实验日志目录
+    if not os.path.exists(f'{current_exp_stp}/{experiment_id}'):
+        os.makedirs(f'{current_exp_stp}/{experiment_id}')
+    topparams = [p[1] for p in ls_of_params]
+    with open(f'{current_exp_stp}/{experiment_id}/topparams.json', 'w') as f:
+        json.dump(convert_floats(topparams), f, ensure_ascii=False, indent=4)
     results = []
     for best_param_id, best_params, sequence_ids in ls_of_params:
         foldername = str(best_exp_id)+ '_' + str(best_param_id) + '_' + str(train_config['grouping_parameter_id'])

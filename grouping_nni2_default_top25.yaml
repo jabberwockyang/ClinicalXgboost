@@ -8,8 +8,8 @@ train:
   exp_stp: 'gr_explog'
   filepath: 'output/dataforxgboost.csv'
   target_column: 'VisitDuration'
-  dvpath: VariablesImportance/ZpoUyrIC_default_top7_fromnni/feature_importance_summary.json
-  importance_sorting:
+  dvpath: VariablesImportance/nni1_explog/ZpoUyrIC_default_top7_fromnni/feature_importance_summary.json
+  importance_sorting: 
   grouping_parameter_id: '1'
   groupingparams: 
     bins: [0, 2, 6, 12, 25, 55, 150]

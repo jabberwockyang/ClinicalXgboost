@@ -87,7 +87,7 @@ def preprocess_data(df, target_column,
     labels = groupingparams['labels']
 
     df = df.assign(agegroup=pd.cut(df['FirstVisitAge'], bins= bins, labels= labels))
-    print(df['agegroup'].value_counts())
+    
     df['agegroup'] = pd.Categorical(df['agegroup'], categories= labels, ordered=True)
 
     # Missing value imputation and other preprocessing

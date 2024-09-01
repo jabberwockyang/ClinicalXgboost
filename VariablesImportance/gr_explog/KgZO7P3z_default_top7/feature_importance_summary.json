@@ -1,0 +1,149 @@
+[
+    {
+        "label": "0-2",
+        "n": 15,
+        "top_n": [
+            "LymphocytesPercentage_Avg",
+            "MeanPlateletVolume_Avg",
+            "MeanCorpuscularVolume_Max",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MonocytesPercentage_Avg",
+            "WhiteBloodCellCount_Max",
+            "PlateletCount_Avg",
+            "AbsoluteEosinophilCount_Min",
+            "LymphocytesPercentage_Max",
+            "MeanCorpuscularHemoglobin_Max",
+            "MeanCorpuscularVolume_Avg",
+            "MeanPlateletVolume_Max",
+            "Hematocrit_Max",
+            "FirstVisitAge"
+        ]
+    },
+    {
+        "label": "12-25",
+        "n": 15,
+        "top_n": [
+            "EosinophilsPercentage_Min",
+            "FirstVisitAge",
+            "TotalThyroxine_Avg",
+            "MeanCorpuscularVolume_Max",
+            "EosinophilsPercentage_Max",
+            "Hematocrit_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "CReactiveProtein_Min",
+            "WhiteBloodCellCount_Min",
+            "MonocytesPercentage_Avg",
+            "DogDander_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MeanPlateletVolume_Avg",
+            "LymphocytesPercentage_Avg",
+            "LymphocytesPercentage_Max"
+        ]
+    },
+    {
+        "label": "2-6",
+        "n": 15,
+        "top_n": [
+            "LymphocytesPercentage_Avg",
+            "MeanPlateletVolume_Avg",
+            "FirstVisitAge",
+            "LymphocytesPercentage_Max",
+            "RedCellDistributionWidthCV_Avg",
+            "MeanPlateletVolume_Min",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "PlateletCount_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MeanCorpuscularVolume_Max",
+            "EosinophilsPercentage_Min",
+            "Plateletcrit_Min",
+            "PlateletDistributionWidth_Avg",
+            "MonocytesPercentage_Avg",
+            "MeanCorpuscularVolume_Avg"
+        ]
+    },
+    {
+        "label": "25-55",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "LymphocytesPercentage_Avg",
+            "MeanPlateletVolume_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "Hematocrit_Avg",
+            "MonocytesPercentage_Avg",
+            "PlateletCount_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Min",
+            "MonocytesPercentage_Max",
+            "MeanCorpuscularVolume_Max",
+            "PlateletCount_Max",
+            "RedCellDistributionWidthCV_Avg",
+            "LymphocytesPercentage_Max",
+            "LymphocytesPercentage_Min"
+        ]
+    },
+    {
+        "label": "55+",
+        "n": 15,
+        "top_n": [
+            "MeanPlateletVolume_Avg",
+            "LymphocytesPercentage_Avg",
+            "FirstVisitAge",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "PlateletCount_Avg",
+            "MonocytesPercentage_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "PlateletCount_Max",
+            "RedCellDistributionWidthCV_Avg",
+            "Hematocrit_Avg",
+            "MeanCorpuscularVolume_Max",
+            "EosinophilsPercentage_Min",
+            "MonocytesPercentage_Max",
+            "MeanCorpuscularHemoglobinConcentration_Min",
+            "Hematocrit_Max"
+        ]
+    },
+    {
+        "label": "6-12",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "MeanPlateletVolume_Avg",
+            "WhiteBloodCellCount_Avg",
+            "MeanCorpuscularVolume_Max",
+            "LymphocytesPercentage_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "AbsoluteEosinophilCount_Max",
+            "EosinophilsPercentage_Min",
+            "MonocytesPercentage_Avg",
+            "EosinophilCountAbsolute_Avg",
+            "RedCellDistributionWidthCV_Avg",
+            "ImmunoglobulinE_Avg",
+            "EosinophilsPercentage_Avg",
+            "Hematocrit_Avg",
+            "RedCellDistributionWidth_Avg"
+        ]
+    },
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "MeanPlateletVolume_Avg",
+            "LymphocytesPercentage_Avg",
+            "Hematocrit_Avg",
+            "MeanCorpuscularHemoglobin_Avg",
+            "MonocytesPercentage_Avg",
+            "MeanCorpuscularHemoglobinConcentration_Avg",
+            "TotalThyroxine_Avg",
+            "LymphocytesPercentage_Max",
+            "RedCellDistributionWidthCV_Avg",
+            "PlateletCount_Avg",
+            "EosinophilsPercentage_Min",
+            "MeanCorpuscularVolume_Max",
+            "ImmunoglobulinE_Avg",
+            "MeanPlateletVolume_Min"
+        ]
+    }
+]

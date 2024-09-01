@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from best_params import opendb, get_best_params
 from utils import plot_roc_summary, parse_gr_results, parse_nni_results
-
+from loguru import logger
 # todo 去除离群值
 
 def within_n_std(data, column, n):
@@ -14,11 +14,13 @@ def within_n_std(data, column, n):
 
 # list all folder in repodir 
 def LoadData(repodir):
-        
+    logger.info(f"Loading data from {repodir}")
     allfolder = [dir for dir in os.listdir(repodir) if os.path.isdir(os.path.join(repodir, dir))]
     dflist = [] 
+    logger.info(f"found {len(allfolder)} folders")
     for folder in allfolder:
         labels_trained = [dir for dir in os.listdir(os.path.join(repodir, folder)) if os.path.isdir(os.path.join(repodir, folder, dir))]
+        logger.info(f"found {len(labels_trained)} labels in {folder}")
         for label in labels_trained:
             df_path = os.path.join(repodir, folder, label, "result","0",'feature_importance.csv')
             df = pd.read_csv(df_path)
@@ -73,7 +75,7 @@ def PlotImportance(df, labels, outdir,n=15):
     mapcategory2color = dict(zip(mapcategory2feature.keys(), colors))
     top_n_list = []
     for label in labels:
-        print(label)    
+          
         data = df[df['group'] == label]
         #  for each feature remove outliers by mean +- n*std
         filtereddata = []
@@ -147,10 +149,11 @@ if __name__ == '__main__':
     # RefreshFeatureImportance(grdir)
     if grdir:
         # join variablesImportance folder with the dir of grdir and basename of grdir
+        logger.info(f"grdir: {grdir}")
         outdir = os.path.join('VariablesImportance', os.path.basename(os.path.dirname(grdir)), os.path.basename(grdir))
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        
+        logger.info(f"outdir: {outdir}")
         # plot ROC Summary
         jsonfilepath = [p for p in os.listdir(grdir) if p.endswith('_results.json')][0]
         if os.path.exists(os.path.join(grdir, jsonfilepath)):
@@ -158,13 +161,13 @@ if __name__ == '__main__':
             rocdf = parse_gr_results(os.path.join(grdir, jsonfilepath))
             plot_roc_summary(rocdf, outdir)
         else:
-            print(f"ROC summary file {jsonfilepath} not found")
+            logger.error(f"ROC summary file {jsonfilepath} not found")
             df = None
             labels = None
         
     elif nnidir and args.metric and args.minimize and args.number_of_trials:
         nnidir = os.path.realpath(nnidir) 
-        print(f"nnidir: {nnidir}")
+        logger.info(f"nnidir: {nnidir}")
         outdir = os.path.join('VariablesImportance', os.path.basename(os.path.dirname(nnidir)),  f"{os.path.basename(nnidir)}_{args.metric}_top{args.number_of_trials}_fromnni")
         if not os.path.exists(outdir):
             os.makedirs(outdir)
