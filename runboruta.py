@@ -7,15 +7,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from boruta import BorutaPy
 import seaborn as sns
-from utils import preprocess_data, load_data, load_config, augment_samples
+from utils import preprocess_data, load_data, load_config, augment_samples, load_feature_list_from_boruta_file
 from best_params import opendb, get_best_params
-from preprocessor import Preprocessor
+from preprocessor import Preprocessor, FeatureFilter, FeatureDrivator
 from loguru import logger
 from concurrent.futures import ThreadPoolExecutor
 import queue
+import argparse
+import uuid
 
-
-def main(filepath, target_column, log_dir, groupingparams, params):
+def main(filepath,  params, preprocessor):
     paramcopy = params.copy()
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
@@ -28,15 +29,6 @@ def main(filepath, target_column, log_dir, groupingparams, params):
     params["device"] = "cuda"
     params["tree_method"] = "hist"
 
-    # X, y, sample_weight = preprocess_data(data, target_column, 
-    #                                       scale_factor,log_transform, 
-    #                                         groupingparams,
-    #                                         pick_key= 'all',
-    #                                        feature_derivation = None, 
-    #                                        topn=None, sorted_features=None)
-    
-    preprocessor = Preprocessor(target_column, groupingparams)
-    
     X, y, sample_weight = preprocessor.preprocess(data,
                                                   scale_factor,
                                                   log_transform,
@@ -114,18 +106,52 @@ def plot_boruta_by_group(ranking_df, log_dir):
     
     plot_boruta(group_ranking_df, log_dir, name='boruta_by_group')
 
-if __name__ == "__main__":
-    # filepath = 'output/dataforxgboost.csv'
-    # target_column = 'VisitDuration'
-    log_dir = 'boruta_explog'
-    # groupingparams = load_config('groupingsetting.yml')['groupingparams']
-    # best_db_path = 'nni1_explog/ZpoUyrIC/db/nni.sqlite'
-    # df  = opendb(best_db_path)
-    # ls_of_params = get_best_params(df, [('default','minimize')], 1)
-    # best_param = ls_of_params[0][1]
 
-    # ranking_df = main(filepath, target_column, log_dir, groupingparams, best_param)
-    # ranking_df.to_csv(os.path.join(log_dir, 'ranking_df2.csv'))
-    ranking_df = pd.read_csv('boruta_explog/ranking_df2.csv')
+def argparser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--filepath', type=str)
+    parser.add_argument('--best_db_path', type=str)
+
+    parser.add_argument('--target_column', type=str, default='VisitDuration')
+    parser.add_argument('--log_dir', type=str, default='boruta_explog')
+    parser.add_argument('--groupingparams', type=str, default='groupingsetting.yml')
+    parser.add_argument('--features_for_derivation', type=str, default=None, help='a file with features for derivation')
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = argparser()
+    filepath = args.filepath
+    target_column = args.target_column
+    log_dir = args.log_dir
+    # generate unique experiment name
+    experiment_name = str(uuid.uuid4())
+    log_dir = os.path.join(log_dir, experiment_name)
+    os.makedirs(log_dir, exist_ok=True)
+    # save copy of args
+    with open(os.path.join(log_dir, 'args.txt'), 'w') as f:
+        f.write(str(args))
+
+    groupingparams = load_config(args.groupingparams)['groupingparams']
+
+    best_db_path = args.best_db_path
+    df  = opendb(best_db_path)
+    ls_of_params = get_best_params(df, [('default','minimize')], 1)
+    best_param = ls_of_params[0][1]
+    # save copy of best_param
+    with open(os.path.join(log_dir, 'best_param.txt'), 'w') as f:
+        f.write(str(best_param))
+    
+    # 实例化特征衍生
+    features_for_deri = load_feature_list_from_boruta_file(args.features_for_derivation) if args.features_for_derivation else None
+    fd = FeatureDrivator(features_for_deri) if features_for_deri else None
+    
+    # 实例化预处理器
+    preprocessor = Preprocessor(target_column,
+                                 groupingparams,
+                                 feature_derive = fd)
+    
+    ranking_df = main(filepath, best_param, preprocessor)
+    ranking_df.to_csv(os.path.join(log_dir, 'ranking_df.csv'))
     plot_boruta(ranking_df, log_dir)
     plot_boruta_by_group(ranking_df, log_dir)

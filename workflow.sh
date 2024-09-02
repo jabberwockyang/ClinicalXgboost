@@ -127,5 +127,15 @@ python3 runboruta.py
 # feature engingeering with minmxavg and acute chronic avg
 ###  done in sqlquery
 
-# nni5 
+# nni5 GET best params for boruta
 nnictl create --config config_nni5.yml --port 8081 # ZpoUyrIC  nnictl resume ZpoUyrIC --port 8081
+
+# boruta for feature derivation
+best_expid = BD3oGFia
+best_db_path = nni5_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath --best_db_path $best_db_path output/dataforxgboost_ac.csv --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml 
+
+# boruta for feature selection
+best_expid = $(ls -t nni5_explog/ | head -n 1)
+best_db_path = nni5_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath data/train_set_with_derived_features.csv --target_column target --log_dir boruta_explog --groupingparams groupingsetting.yml --best_db_path $best_db_path --features_for_derivation derived_features.txt

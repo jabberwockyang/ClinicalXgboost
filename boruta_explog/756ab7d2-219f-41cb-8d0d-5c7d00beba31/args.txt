@@ -1,0 +1,1 @@
+Namespace(filepath='output/dataforxgboost_ac.csv', best_db_path='nni5_explog/BD3oGFia/db/nni.sqlite', target_column='VisitDuration', log_dir='boruta_explog', groupingparams='groupingsetting.yml', features_for_derivation=None)
