@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/root/ClinicalXgboost/train_nni.py", line 145, in <module>
-    pp = Preprocessor(target_column, groupingparams,
-TypeError: Preprocessor.__init__() got an unexpected keyword argument 'feature_derivation'

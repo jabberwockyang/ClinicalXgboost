@@ -1,1 +1,0 @@
-ME000186{"parameter_id": 1, "trial_job_id": "vieqf", "type": "FINAL", "sequence": 0, "value": "{\"default\": 166335.15625, \"roc_auc\": 0.8909195643066611, \"prerec_auc\": 0.9361378518325056}"}
