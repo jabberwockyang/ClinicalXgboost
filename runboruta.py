@@ -42,6 +42,7 @@ def main(filepath,  params, preprocessor):
     rf = xgb.XGBRegressor(n_estimators = n_estimators,**params)
     # 初始化一个 DataFrame 来存储特征排名
     ranking_df = pd.DataFrame(columns=X.columns)
+    confirmed_vars_list = []
     output_queue = queue.Queue()
 
     def run_boruta(X, y, i):
@@ -51,11 +52,12 @@ def main(filepath,  params, preprocessor):
     
         # 初始化Boruta特征选择器
         boruta_selector = BorutaPy(rf, n_estimators=n_estimators, verbose=2, 
-                                   random_state=i, max_iter=25)
+                                   random_state=i, max_iter=50)
     
         boruta_selector.fit(X_train, y_train)
+        confirmed_vars = X.columns[boruta_selector.support_]
         feature_ranks = boruta_selector.ranking_
-        output_queue.put((i+1, feature_ranks))
+        output_queue.put((i+1, confirmed_vars, feature_ranks))
 
     # 使用多线程执行 Boruta
     with ThreadPoolExecutor(max_workers=5) as executor:
@@ -65,10 +67,11 @@ def main(filepath,  params, preprocessor):
 
     # 从队列中获取结果并更新 ranking_df
     while not output_queue.empty():
-        i, feature_ranks = output_queue.get()
+        i, confirmed_vars, feature_ranks = output_queue.get()
         ranking_df.loc[i] = feature_ranks
+        confirmed_vars_list.append(confirmed_vars)
 
-    return ranking_df
+    return ranking_df, confirmed_vars_list # return the last confirmed vars 
 
 def plot_boruta(ranking_df, log_dir, name = 'boruta'):
     numeric_ranking_df = ranking_df.apply(pd.to_numeric, errors='coerce')
@@ -151,7 +154,11 @@ if __name__ == "__main__":
                                  groupingparams,
                                  feature_derive = fd)
     
-    ranking_df = main(filepath, best_param, preprocessor)
+    ranking_df, confirmed_vars_list = main(filepath, best_param, preprocessor)
     ranking_df.to_csv(os.path.join(log_dir, 'ranking_df.csv'))
+    with open(os.path.join(log_dir, 'confirmed_vars.txt'), 'w') as f:
+        for confirmed_vars in confirmed_vars_list:
+            f.write(','.join(confirmed_vars))
+            f.write('\n')
     plot_boruta(ranking_df, log_dir)
     plot_boruta_by_group(ranking_df, log_dir)

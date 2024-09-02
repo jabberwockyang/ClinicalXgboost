@@ -131,11 +131,11 @@ python3 runboruta.py
 nnictl create --config config_nni5.yml --port 8081 # ZpoUyrIC  nnictl resume ZpoUyrIC --port 8081
 
 # boruta for feature derivation
-best_expid = BD3oGFia
-best_db_path = nni5_explog/$best_expid/db/nni.sqlite
-python3 runboruta.py --filepath --best_db_path $best_db_path output/dataforxgboost_ac.csv --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml 
+best_expid=BD3oGFia
+best_db_path=nni5_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost_ac.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml 
 
 # boruta for feature selection
-best_expid = $(ls -t nni5_explog/ | head -n 1)
-best_db_path = nni5_explog/$best_expid/db/nni.sqlite
-python3 runboruta.py --filepath data/train_set_with_derived_features.csv --target_column target --log_dir boruta_explog --groupingparams groupingsetting.yml --best_db_path $best_db_path --features_for_derivation derived_features.txt
+best_expid=BD3oGFia
+best_db_path=nni5_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost_ac.csv --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml --best_db_path $best_db_path --features_for_derivation boruta_explog/09647097-60b1-4c47-bc04-47eb678f73ea/confirmed_vars.txt

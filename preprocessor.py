@@ -6,21 +6,36 @@ import numpy as np
 import itertools
 from loguru import logger
 from utils import load_config
-
+from pandas.errors import PerformanceWarning
+def get_asso_feat(feat, featlist):
+    '''
+    feat: str, feature to be associated
+    featlist: list of str, list of features to be associated with feat
+    '''
+    assofeat = [f for f in featlist if feat in f]
+    return assofeat
 
 class FeatureDrivator:
     def __init__(self, list_of_features: list):
         self.features_for_derive = list_of_features
+
     def derive(self, df: pd.DataFrame):
-        logger.info(f"Deriving features using {len(self.features_for_derive)} features")
-        combinations = list(itertools.combinations(self.features_for_derive, 2))
+        features_to_derive = []
+        for feat in self.features_for_derive:
+            assofeat = get_asso_feat(feat, df.columns)
+            features_to_derive.extend(assofeat)
+
+        logger.info(f"Deriving features using {len(features_to_derive)} features")
+        combinations = list(itertools.combinations(features_to_derive, 2))
         logger.info(f"Number of derived features: {len(combinations)}")
         # 对于每一对特征组合，生成派生变量并添加到df中
+        # closewarning # PerformanceWarning: DataFrame is highly fragmented. 
+        warnings.filterwarnings("ignore", category=PerformanceWarning, message="DataFrame is highly fragmented.")
         for (feat1, feat2) in combinations:
             # 创建新的派生变量列名
             new_col_name = f'{feat1}_div_{feat2}'
             df[new_col_name] = df[feat1] / (df[feat2] + 1e-10)
-
+        warnings.filterwarnings("default", category=PerformanceWarning, message="DataFrame is highly fragmented.")
         logger.info(f"Derived features: {df.columns[df.columns.str.contains('_div_')][:5]} ...")
         return df
 
@@ -57,9 +72,9 @@ class FeatureFilter:
         if topn is None, all features are selected
         '''
         # feature filtering by importance sorting
-        features_to_use = [feat for feat in df.columns if feat not in [self.target_column, 'sample_weight','agegroup', 'visitdurationgroup']]
+        original_features_to_use = [feat for feat in df.columns if feat not in [self.target_column, 'sample_weight','agegroup', 'visitdurationgroup']]
         logger.info(f"""Filtering features using sorting method 
-                    based on pick topn: {topn} in {len(features_to_use)} features 
+                    based on pick topn: {topn} in {len(original_features_to_use)} features 
                     in the order of importance provided: {self.features_list[:5]} ...""")
         if topn is None: # only when topn is not provided in search space will it be None
             raise ValueError("topn is not found in search space while FeatureFilter is instanced pls check")
@@ -71,16 +86,26 @@ class FeatureFilter:
         else: # topn is a ratio between 0 and 1
             topn = round(len(features_to_use) * topn) 
         # rank features to use by sorted_features if not in features_to_use then place at the end
+        features_to_use = []
+        for feat in self.features_list: # 遍历features_list 在featuretouse 中添加关联特征 
+            assofeat = get_asso_feat(feat, df.columns)
+            features_to_use.extend(assofeat)
 
-        features_to_use = [feat for feat in self.features_list if feat in features_to_use]  + [feat for feat in features_to_use if feat not in self.features_list]
+        features_to_use.extend([feat for feat in original_features_to_use if feat not in features_to_use]) # 在featuretouse 结尾添加 其余特征
+
         features_to_use = features_to_use[:topn]
         logger.info(f"Selected features: {features_to_use[:5]} ...")
         df = df[features_to_use + [self.target_column, 'sample_weight','agegroup', 'visitdurationgroup']]
         return df
 
+  
 
     def _selection(self, df: pd.DataFrame):
-        features_to_use = [feat for feat in self.features_list if feat in df.columns]
+        features_to_use = []
+        for feat in self.features_list:
+            assofeat = get_asso_feat(feat, df.columns)
+            features_to_use.extend(assofeat)
+
         logger.info(f"""Filtering features using selection method based on features provided: 
                     {self.features_list[:5]} ...
                     provided features number: {len(self.features_list)}

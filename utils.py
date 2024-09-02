@@ -477,4 +477,15 @@ def augment_samples(X, y, sample_weight):
     return X_augmented, y_augmented
 
 def load_feature_list_from_boruta_file(boruta_file:str):
-    return None
+    with open(boruta_file, 'r') as f:
+        varlist = f.readlines()
+    varlist = [vars.split(',') for vars in varlist] 
+    new_varlist = []
+    for vars in varlist:
+        newvars = [v.split('_')[0] for v in vars]
+        new_varlist.append(newvars)
+    
+    # intersect all the list in new_varlist
+    intersected_vars = set.intersection(*map(set, new_varlist))
+    logger.info(f"Found {len(intersected_vars)} common variables in all the lists")
+    return list(intersected_vars)

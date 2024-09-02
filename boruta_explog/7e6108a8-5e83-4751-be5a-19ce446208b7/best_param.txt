@@ -1,0 +1,1 @@
+{'max_depth': 5, 'min_child_weight': 4.307814975773927, 'gamma': 0.4826408898630199, 'colsample_bytree': 0.5163174644697646, 'learning_rate': 0.05, 'alpha': 0.1, 'objective': 'reg:squarederror', 'num_boost_round': 100, 'custom_metric': 'roc_auc', 'scale_factor': 2, 'log_transform': 'None', 'early_stopping_rounds': 400}
