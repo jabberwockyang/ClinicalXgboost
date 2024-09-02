@@ -117,6 +117,6 @@ done
 # results show the previous grouping strategy is better
 
 # try boruta
-python3 boruta.py
+python3 runboruta.py
 
 #during boruta discover problem with imputation run nni1 again and grouping and importance

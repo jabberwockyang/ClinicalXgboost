@@ -141,7 +141,7 @@ def preprocess_data(df, target_column,
     else: # topn is a ratio between 0 and 1
         topn = round(len(features_to_use) * topn) 
     # rank features to use by sorted_features if not in features_to_use then place at the end
-    if sorted_features is not None:
+    if isinstance(sorted_features, list):
         features_to_use = [feat for feat in sorted_features if feat in features_to_use]  + [feat for feat in features_to_use if feat not in sorted_features]
         features_to_use = features_to_use[:topn]
         print(f"Number of features used: {len(features_to_use)}")
