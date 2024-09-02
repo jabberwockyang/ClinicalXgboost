@@ -120,3 +120,12 @@ done
 python3 runboruta.py
 
 #during boruta discover problem with imputation run nni1 again and grouping and importance
+
+# BORUTA shows good performance in feature selection   
+
+# a new workflow
+# feature engingeering with minmxavg and acute chronic avg
+###  done in sqlquery
+
+# nni5 
+nnictl create --config config_nni5.yml --port 8081 # ZpoUyrIC  nnictl resume ZpoUyrIC --port 8081

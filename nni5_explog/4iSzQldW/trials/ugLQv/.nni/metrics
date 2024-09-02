@@ -1,0 +1,1 @@
+ME000186{"parameter_id": 2, "trial_job_id": "ugLQv", "type": "FINAL", "sequence": 0, "value": "{\"default\": 192084.296875, \"roc_auc\": 0.8973227112446128, \"prerec_auc\": 0.940131958635251}"}

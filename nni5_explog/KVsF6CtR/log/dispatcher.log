@@ -1,0 +1,37 @@
+[2024-09-02 16:18:13] INFO (hyperopt.utils/MainThread) Failed to load dill, try installing dill via "pip install dill" for enhanced pickling support.
+[2024-09-02 16:18:13] INFO (hyperopt.fmin/MainThread) Failed to load dill, try installing dill via "pip install dill" for enhanced pickling support.
+[2024-09-02 16:18:14] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher started
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002520 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002545 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.018784 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002274 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002263 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002262 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002273 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002275 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002284 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002295 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002267 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002287 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002553 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002300 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002468 seconds
+[2024-09-02 16:18:14] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:39] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002509 seconds
+[2024-09-02 16:18:39] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:18:45] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher exiting...
+[2024-09-02 16:18:48] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher terminiated

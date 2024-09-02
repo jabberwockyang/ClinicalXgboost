@@ -1,0 +1,1 @@
+ME000185{"parameter_id": 0, "trial_job_id": "F0DcY", "type": "FINAL", "sequence": 0, "value": "{\"default\": 164933.5625, \"roc_auc\": 0.8974271908057987, \"prerec_auc\": 0.9420043277747895}"}

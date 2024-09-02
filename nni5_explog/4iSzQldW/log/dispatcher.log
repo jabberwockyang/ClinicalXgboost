@@ -1,0 +1,15 @@
+[2024-09-02 16:19:55] INFO (hyperopt.utils/MainThread) Failed to load dill, try installing dill via "pip install dill" for enhanced pickling support.
+[2024-09-02 16:19:55] INFO (hyperopt.fmin/MainThread) Failed to load dill, try installing dill via "pip install dill" for enhanced pickling support.
+[2024-09-02 16:19:56] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher started
+[2024-09-02 16:19:56] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002534 seconds
+[2024-09-02 16:19:56] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:20:26] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002804 seconds
+[2024-09-02 16:20:26] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 1/1 trials with best loss 164933.562500
+[2024-09-02 16:20:56] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.019190 seconds
+[2024-09-02 16:20:56] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 2/2 trials with best loss 164933.562500
+[2024-09-02 16:21:26] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002532 seconds
+[2024-09-02 16:21:26] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 3/3 trials with best loss 164933.562500
+[2024-09-02 16:21:57] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002540 seconds
+[2024-09-02 16:21:57] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 4/4 trials with best loss 155192.562500
+[2024-09-02 16:22:09] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher exiting...
+[2024-09-02 16:22:12] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher terminiated

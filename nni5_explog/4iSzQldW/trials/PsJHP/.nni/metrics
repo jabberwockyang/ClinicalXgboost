@@ -1,0 +1,1 @@
+ME000185{"parameter_id": 3, "trial_job_id": "PsJHP", "type": "FINAL", "sequence": 0, "value": "{\"default\": 155192.5625, \"roc_auc\": 0.8454325388380506, \"prerec_auc\": 0.9192542242350284}"}

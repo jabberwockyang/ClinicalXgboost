@@ -1,0 +1,11 @@
+[2024-09-02 16:18:58] INFO (hyperopt.utils/MainThread) Failed to load dill, try installing dill via "pip install dill" for enhanced pickling support.
+[2024-09-02 16:18:58] INFO (hyperopt.fmin/MainThread) Failed to load dill, try installing dill via "pip install dill" for enhanced pickling support.
+[2024-09-02 16:18:59] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher started
+[2024-09-02 16:18:59] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002485 seconds
+[2024-09-02 16:18:59] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:19:18] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.002761 seconds
+[2024-09-02 16:19:18] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:19:39] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) tpe_transform took 0.018336 seconds
+[2024-09-02 16:19:39] INFO (hyperopt.tpe/Thread-1 (command_queue_worker)) TPE using 0 trials
+[2024-09-02 16:19:43] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher exiting...
+[2024-09-02 16:19:45] INFO (nni.runtime.msg_dispatcher_base/MainThread) Dispatcher terminiated

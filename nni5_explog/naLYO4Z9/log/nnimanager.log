@@ -1,0 +1,165 @@
+[2024-09-02 16:16:02] INFO (NNIDataStore) Datastore initialization done
+[2024-09-02 16:16:02] INFO (RestServer) RestServer start
+[2024-09-02 16:16:02] WARNING (NNITensorboardManager) Tensorboard may not installed, if you want to use tensorboard, please check if tensorboard installed.
+[2024-09-02 16:16:02] INFO (RestServer) RestServer base port is 8081
+[2024-09-02 16:16:02] INFO (main) Rest server listening on: http://0.0.0.0:8081
+[2024-09-02 16:16:03] INFO (NNIManager) Starting experiment: naLYO4Z9
+[2024-09-02 16:16:03] INFO (NNIManager) Setup training service...
+[2024-09-02 16:16:05] INFO (LocalTrainingService) Construct local machine training service.
+[2024-09-02 16:16:05] INFO (NNIManager) Setup tuner...
+[2024-09-02 16:16:05] INFO (NNIManager) Change NNIManager status from: INITIALIZED to: RUNNING
+[2024-09-02 16:16:05] INFO (NNIManager) Add event listeners
+[2024-09-02 16:16:05] INFO (LocalTrainingService) Run local machine training service.
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: ID, 
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 0, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 5.828934697611722, "gamma": 0.06392805616965547, "colsample_bytree": 0.9636296137747481, "learning_rate": 0.2, "alpha": 0.1, "objective": "reg:squaredlogerror", "num_boost_round": 100, "custom_metric": "prerec_auc", "scale_factor": 5, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 1, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 9.790490095305527, "gamma": 0.44335059438260416, "colsample_bytree": 0.58289925137752, "learning_rate": 0.2, "alpha": 0.05, "objective": "count:poisson", "num_boost_round": 400, "custom_metric": "roc_auc", "scale_factor": 1, "log_transform": "log10", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 2, "parameter_source": "algorithm", "parameters": {"max_depth": 9, "min_child_weight": 3.491608497333592, "gamma": 0.29144551453279716, "colsample_bytree": 0.8149317514599168, "learning_rate": 0.2, "alpha": 0.01, "objective": "count:poisson", "num_boost_round": 800, "custom_metric": "prerec_auc", "scale_factor": 10, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 3, "parameter_source": "algorithm", "parameters": {"max_depth": 5, "min_child_weight": 1.7612272671503115, "gamma": 0.029144971032860068, "colsample_bytree": 0.8976062920561396, "learning_rate": 0.01, "alpha": 0.2, "objective": "reg:squarederror", "num_boost_round": 200, "custom_metric": "prerec_auc", "scale_factor": 5, "log_transform": "None", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 4, "parameter_source": "algorithm", "parameters": {"max_depth": 5, "min_child_weight": 8.627340325888518, "gamma": 0.07099457302886492, "colsample_bytree": 0.5456925957410986, "learning_rate": 0.2, "alpha": 0.01, "objective": "count:poisson", "num_boost_round": 100, "custom_metric": "prerec_auc", "scale_factor": 10, "log_transform": "log2", "early_stopping_rounds": 100}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 5, "parameter_source": "algorithm", "parameters": {"max_depth": 3, "min_child_weight": 8.637989669759424, "gamma": 0.26230435821070114, "colsample_bytree": 0.5079964510774924, "learning_rate": 0.1, "alpha": 0.2, "objective": "count:poisson", "num_boost_round": 100, "custom_metric": "prerec_auc", "scale_factor": 2, "log_transform": "log10", "early_stopping_rounds": 100}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 6, "parameter_source": "algorithm", "parameters": {"max_depth": 4, "min_child_weight": 4.8489457141802585, "gamma": 0.4540654755596325, "colsample_bytree": 0.7596273277432835, "learning_rate": 0.1, "alpha": 0.2, "objective": "reg:squaredlogerror", "num_boost_round": 200, "custom_metric": "prerec_auc", "scale_factor": 5, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 7, "parameter_source": "algorithm", "parameters": {"max_depth": 9, "min_child_weight": 4.630496069655557, "gamma": 0.12092102579881975, "colsample_bytree": 0.8703064951394368, "learning_rate": 0.1, "alpha": 0.05, "objective": "reg:squaredlogerror", "num_boost_round": 400, "custom_metric": "roc_auc", "scale_factor": 10, "log_transform": "log2", "early_stopping_rounds": 50}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 8, "parameter_source": "algorithm", "parameters": {"max_depth": 9, "min_child_weight": 4.37276345722802, "gamma": 0.2286889012053383, "colsample_bytree": 0.5250639574699183, "learning_rate": 0.01, "alpha": 0.1, "objective": "reg:squaredlogerror", "num_boost_round": 100, "custom_metric": "roc_auc", "scale_factor": 2, "log_transform": "log10", "early_stopping_rounds": 100}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 9, "parameter_source": "algorithm", "parameters": {"max_depth": 50, "min_child_weight": 2.1161338621504044, "gamma": 0.130601715250456, "colsample_bytree": 0.38762937882784476, "learning_rate": 0.1, "alpha": 0.01, "objective": "reg:squaredlogerror", "num_boost_round": 200, "custom_metric": "prerec_auc", "scale_factor": 1, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 10, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 7.777221441866971, "gamma": 0.3396264015620848, "colsample_bytree": 0.8951822026977012, "learning_rate": 0.01, "alpha": 0.1, "objective": "reg:squarederror", "num_boost_round": 800, "custom_metric": "roc_auc", "scale_factor": 1, "log_transform": "None", "early_stopping_rounds": 100}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 11, "parameter_source": "algorithm", "parameters": {"max_depth": 50, "min_child_weight": 3.7823546040542793, "gamma": 0.37756735849482076, "colsample_bytree": 0.8263840450942723, "learning_rate": 0.2, "alpha": 0.1, "objective": "reg:squaredlogerror", "num_boost_round": 400, "custom_metric": "roc_auc", "scale_factor": 2, "log_transform": "log10", "early_stopping_rounds": 400}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 12, "parameter_source": "algorithm", "parameters": {"max_depth": 3, "min_child_weight": 4.9989076067869025, "gamma": 0.23464965507392727, "colsample_bytree": 0.32002194146061436, "learning_rate": 0.1, "alpha": 0.05, "objective": "reg:squarederror", "num_boost_round": 400, "custom_metric": "prerec_auc", "scale_factor": 2, "log_transform": "None", "early_stopping_rounds": 200}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 13, "parameter_source": "algorithm", "parameters": {"max_depth": 5, "min_child_weight": 5.797956376006466, "gamma": 0.21329067124217804, "colsample_bytree": 0.5571437597106971, "learning_rate": 0.01, "alpha": 0.2, "objective": "reg:squarederror", "num_boost_round": 800, "custom_metric": "roc_auc", "scale_factor": 1, "log_transform": "log10", "early_stopping_rounds": 50}, "parameter_index": 0}
+[2024-09-02 16:16:20] INFO (NNIManager) NNIManager received command from dispatcher: TR, {"parameter_id": 14, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 5.0707464921191345, "gamma": 0.3942868902393461, "colsample_bytree": 0.6227130430669131, "learning_rate": 0.05, "alpha": 0.05, "objective": "reg:squaredlogerror", "num_boost_round": 200, "custom_metric": "roc_auc", "scale_factor": 5, "log_transform": "None", "early_stopping_rounds": 100}, "parameter_index": 0}
+[2024-09-02 16:16:25] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 0,
+  hyperParameters: {
+    value: '{"parameter_id": 0, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 5.828934697611722, "gamma": 0.06392805616965547, "colsample_bytree": 0.9636296137747481, "learning_rate": 0.2, "alpha": 0.1, "objective": "reg:squaredlogerror", "num_boost_round": 100, "custom_metric": "prerec_auc", "scale_factor": 5, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:25] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 1,
+  hyperParameters: {
+    value: '{"parameter_id": 1, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 9.790490095305527, "gamma": 0.44335059438260416, "colsample_bytree": 0.58289925137752, "learning_rate": 0.2, "alpha": 0.05, "objective": "count:poisson", "num_boost_round": 400, "custom_metric": "roc_auc", "scale_factor": 1, "log_transform": "log10", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:25] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 2,
+  hyperParameters: {
+    value: '{"parameter_id": 2, "parameter_source": "algorithm", "parameters": {"max_depth": 9, "min_child_weight": 3.491608497333592, "gamma": 0.29144551453279716, "colsample_bytree": 0.8149317514599168, "learning_rate": 0.2, "alpha": 0.01, "objective": "count:poisson", "num_boost_round": 800, "custom_metric": "prerec_auc", "scale_factor": 10, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:25] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 3,
+  hyperParameters: {
+    value: '{"parameter_id": 3, "parameter_source": "algorithm", "parameters": {"max_depth": 5, "min_child_weight": 1.7612272671503115, "gamma": 0.029144971032860068, "colsample_bytree": 0.8976062920561396, "learning_rate": 0.01, "alpha": 0.2, "objective": "reg:squarederror", "num_boost_round": 200, "custom_metric": "prerec_auc", "scale_factor": 5, "log_transform": "None", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:25] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 4,
+  hyperParameters: {
+    value: '{"parameter_id": 4, "parameter_source": "algorithm", "parameters": {"max_depth": 5, "min_child_weight": 8.627340325888518, "gamma": 0.07099457302886492, "colsample_bytree": 0.5456925957410986, "learning_rate": 0.2, "alpha": 0.01, "objective": "count:poisson", "num_boost_round": 100, "custom_metric": "prerec_auc", "scale_factor": 10, "log_transform": "log2", "early_stopping_rounds": 100}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:25] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 5,
+  hyperParameters: {
+    value: '{"parameter_id": 5, "parameter_source": "algorithm", "parameters": {"max_depth": 3, "min_child_weight": 8.637989669759424, "gamma": 0.26230435821070114, "colsample_bytree": 0.5079964510774924, "learning_rate": 0.1, "alpha": 0.2, "objective": "count:poisson", "num_boost_round": 100, "custom_metric": "prerec_auc", "scale_factor": 2, "log_transform": "log10", "early_stopping_rounds": 100}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:26] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 6,
+  hyperParameters: {
+    value: '{"parameter_id": 6, "parameter_source": "algorithm", "parameters": {"max_depth": 4, "min_child_weight": 4.8489457141802585, "gamma": 0.4540654755596325, "colsample_bytree": 0.7596273277432835, "learning_rate": 0.1, "alpha": 0.2, "objective": "reg:squaredlogerror", "num_boost_round": 200, "custom_metric": "prerec_auc", "scale_factor": 5, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:31] INFO (NNIManager) Trial job qOQmf status changed from WAITING to RUNNING
+[2024-09-02 16:16:31] INFO (NNIManager) Trial job nWpTe status changed from WAITING to RUNNING
+[2024-09-02 16:16:31] INFO (NNIManager) Trial job lJJXY status changed from WAITING to RUNNING
+[2024-09-02 16:16:31] INFO (NNIManager) Trial job sItTs status changed from WAITING to RUNNING
+[2024-09-02 16:16:31] INFO (NNIManager) Trial job jYE2N status changed from WAITING to RUNNING
+[2024-09-02 16:16:31] INFO (NNIManager) Trial job NGjAm status changed from WAITING to RUNNING
+[2024-09-02 16:16:32] INFO (NNIManager) Trial job uz4fU status changed from WAITING to RUNNING
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job qOQmf status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job nWpTe status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job lJJXY status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job sItTs status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job jYE2N status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job NGjAm status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) Trial job uz4fU status changed from RUNNING to FAILED
+[2024-09-02 16:16:42] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 7,
+  hyperParameters: {
+    value: '{"parameter_id": 7, "parameter_source": "algorithm", "parameters": {"max_depth": 9, "min_child_weight": 4.630496069655557, "gamma": 0.12092102579881975, "colsample_bytree": 0.8703064951394368, "learning_rate": 0.1, "alpha": 0.05, "objective": "reg:squaredlogerror", "num_boost_round": 400, "custom_metric": "roc_auc", "scale_factor": 10, "log_transform": "log2", "early_stopping_rounds": 50}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:16:47] INFO (NNIManager) Trial job IATAE status changed from WAITING to RUNNING
+[2024-09-02 16:16:57] INFO (NNIManager) Trial job IATAE status changed from RUNNING to FAILED
+[2024-09-02 16:16:57] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 8,
+  hyperParameters: {
+    value: '{"parameter_id": 8, "parameter_source": "algorithm", "parameters": {"max_depth": 9, "min_child_weight": 4.37276345722802, "gamma": 0.2286889012053383, "colsample_bytree": 0.5250639574699183, "learning_rate": 0.01, "alpha": 0.1, "objective": "reg:squaredlogerror", "num_boost_round": 100, "custom_metric": "roc_auc", "scale_factor": 2, "log_transform": "log10", "early_stopping_rounds": 100}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:17:03] INFO (NNIManager) Trial job WezSk status changed from WAITING to RUNNING
+[2024-09-02 16:17:08] INFO (NNIManager) Trial job WezSk status changed from RUNNING to FAILED
+[2024-09-02 16:17:08] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 9,
+  hyperParameters: {
+    value: '{"parameter_id": 9, "parameter_source": "algorithm", "parameters": {"max_depth": 50, "min_child_weight": 2.1161338621504044, "gamma": 0.130601715250456, "colsample_bytree": 0.38762937882784476, "learning_rate": 0.1, "alpha": 0.01, "objective": "reg:squaredlogerror", "num_boost_round": 200, "custom_metric": "prerec_auc", "scale_factor": 1, "log_transform": "log2", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:17:13] INFO (NNIManager) Trial job tIhE3 status changed from WAITING to RUNNING
+[2024-09-02 16:17:18] INFO (NNIManager) Trial job tIhE3 status changed from RUNNING to FAILED
+[2024-09-02 16:17:18] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 10,
+  hyperParameters: {
+    value: '{"parameter_id": 10, "parameter_source": "algorithm", "parameters": {"max_depth": 100, "min_child_weight": 7.777221441866971, "gamma": 0.3396264015620848, "colsample_bytree": 0.8951822026977012, "learning_rate": 0.01, "alpha": 0.1, "objective": "reg:squarederror", "num_boost_round": 800, "custom_metric": "roc_auc", "scale_factor": 1, "log_transform": "None", "early_stopping_rounds": 100}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:17:23] INFO (NNIManager) Trial job oR408 status changed from WAITING to RUNNING
+[2024-09-02 16:17:33] INFO (NNIManager) Trial job oR408 status changed from RUNNING to FAILED
+[2024-09-02 16:17:33] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 11,
+  hyperParameters: {
+    value: '{"parameter_id": 11, "parameter_source": "algorithm", "parameters": {"max_depth": 50, "min_child_weight": 3.7823546040542793, "gamma": 0.37756735849482076, "colsample_bytree": 0.8263840450942723, "learning_rate": 0.2, "alpha": 0.1, "objective": "reg:squaredlogerror", "num_boost_round": 400, "custom_metric": "roc_auc", "scale_factor": 2, "log_transform": "log10", "early_stopping_rounds": 400}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:17:39] INFO (NNIManager) Trial job L4NZ6 status changed from WAITING to RUNNING
+[2024-09-02 16:17:49] INFO (NNIManager) Trial job L4NZ6 status changed from RUNNING to FAILED
+[2024-09-02 16:17:49] INFO (NNIManager) submitTrialJob: form: {
+  sequenceId: 12,
+  hyperParameters: {
+    value: '{"parameter_id": 12, "parameter_source": "algorithm", "parameters": {"max_depth": 3, "min_child_weight": 4.9989076067869025, "gamma": 0.23464965507392727, "colsample_bytree": 0.32002194146061436, "learning_rate": 0.1, "alpha": 0.05, "objective": "reg:squarederror", "num_boost_round": 400, "custom_metric": "prerec_auc", "scale_factor": 2, "log_transform": "None", "early_stopping_rounds": 200}, "parameter_index": 0}',
+    index: 0
+  },
+  placementConstraint: { type: 'None', gpus: [] }
+}
+[2024-09-02 16:17:54] INFO (NNIManager) Trial job j9MI3 status changed from WAITING to RUNNING
+[2024-09-02 16:17:58] INFO (NNIManager) Change NNIManager status from: RUNNING to: STOPPING
+[2024-09-02 16:17:58] INFO (NNIManager) Stopping experiment, cleaning up ...
+[2024-09-02 16:18:01] INFO (LocalTrainingService) Stopping local machine training service...
+[2024-09-02 16:18:01] INFO (NNIManager) Change NNIManager status from: STOPPING to: STOPPED
+[2024-09-02 16:18:01] INFO (NNIManager) Experiment stopped.
+[2024-09-02 16:18:01] INFO (NNITensorboardManager) Forced stopping all tensorboard task.
+[2024-09-02 16:18:01] INFO (NNITensorboardManager) All tensorboard task stopped.
+[2024-09-02 16:18:01] INFO (NNITensorboardManager) Tensorboard manager stopped.
