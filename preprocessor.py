@@ -130,6 +130,7 @@ class Preprocessor:
 
 
     def _dropna(self, df: pd.DataFrame):
+        logger.info(f"Dropping NaN values")
         # dropna
         ## remove columns with all NaN values in CommonBloodTest
         namelist = [x[1] for x in self.ExaminationItemClass['CommonBloodTest']]
@@ -147,6 +148,7 @@ class Preprocessor:
         return df
     
     def _imputation(self, df: pd.DataFrame):
+        logger.info(f"Imputing missing values")
         # group data by agegroup
         bins = self.groupingparams['bins']
         labels = self.groupingparams['labels']
@@ -161,14 +163,17 @@ class Preprocessor:
             df[col] = df.groupby('agegroup', observed=True)[col].transform(
                 lambda x: x.fillna(x.median() if not np.isnan(x.median()) else overall_median)
             )
-            warnings.filterwarnings("default", category=RuntimeWarning, message="Mean of empty slice")
+        warnings.filterwarnings("default", category=RuntimeWarning, message="Mean of empty slice")
         return df
     
     def _weighting(self, df: pd.DataFrame):
+        logger.info(f"Weighting data by visitdurationgroup")
         # Group data by visitdurationgroup and calculate weights
+        warnings.filterwarnings("ignore", category=PerformanceWarning, message="DataFrame is highly fragmented")
         df['visitdurationgroup'] = pd.cut(df['VisitDuration'], 
                                           bins=[0, 42, 365, 1095, 1825,10000], 
                                           labels=["<6w", "6w-1y", "1-3y", "3-5y", "5y+"], ordered=True, right=False)
+        warnings.filterwarnings("default", category=PerformanceWarning, message="DataFrame is highly fragmented")
         df = df.dropna(subset=['visitdurationgroup'])
         weights = df['visitdurationgroup'].value_counts(normalize=True)
         df['sample_weight'] = df['visitdurationgroup'].map(lambda x: 1 / (weights[x] + 1e-10))
@@ -176,6 +181,7 @@ class Preprocessor:
     
     def _subsetting(self, df: pd.DataFrame, pick_key: str):
         # subsetting data
+        logger.info(f"Subsetting data by agegroup: {pick_key}")
         if pick_key != 'all':
             df = df[df['agegroup'] == pick_key]
         else:
@@ -184,6 +190,7 @@ class Preprocessor:
     
     def _scalingX(self, df: pd.DataFrame):
         # scale the X data by min-max 
+        logger.info(f"Scaling the X data by min-max")
         result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
         for col in result_cols:
             df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
@@ -191,6 +198,7 @@ class Preprocessor:
 
     def _scalingY(self, df: pd.DataFrame, scale_factor, log_transform):
         # scale the Y data by scale_factor and log_transform
+        logger.info(f"Scaling the Y data by scale_factor: {scale_factor} and log_transform: {log_transform}")
         df[self.target_column] = np.round(df[self.target_column] / scale_factor) + 1
         if log_transform == "log2":
             df[self.target_column] = np.log2(df[self.target_column])

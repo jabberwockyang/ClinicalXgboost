@@ -139,3 +139,4 @@ python3 runboruta.py --filepath output/dataforxgboost_ac.csv --best_db_path $bes
 best_expid=BD3oGFia
 best_db_path=nni5_explog/$best_expid/db/nni.sqlite
 python3 runboruta.py --filepath output/dataforxgboost_ac.csv --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml --best_db_path $best_db_path --features_for_derivation boruta_explog/09647097-60b1-4c47-bc04-47eb678f73ea/confirmed_vars.txt
+
