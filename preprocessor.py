@@ -24,19 +24,34 @@ class FeatureDrivator:
         for feat in self.features_for_derive:
             assofeat = get_asso_feat(feat, df.columns)
             features_to_derive.extend(assofeat)
-
+        features_to_derive = list(set(features_to_derive))
         logger.info(f"Deriving features using {len(features_to_derive)} features")
         combinations = list(itertools.combinations(features_to_derive, 2))
         logger.info(f"Number of derived features: {len(combinations)}")
         # 对于每一对特征组合，生成派生变量并添加到df中
         # closewarning # PerformanceWarning: DataFrame is highly fragmented. 
-        warnings.filterwarnings("ignore", category=PerformanceWarning, message="DataFrame is highly fragmented.")
-        for (feat1, feat2) in combinations:
-            # 创建新的派生变量列名
-            new_col_name = f'{feat1}_div_{feat2}'
-            df[new_col_name] = df[feat1] / (df[feat2] + 1e-10)
-        warnings.filterwarnings("default", category=PerformanceWarning, message="DataFrame is highly fragmented.")
+        # warnings.filterwarnings("ignore", category=PerformanceWarning, message="DataFrame is highly fragmented.")
+        # for (feat1, feat2) in combinations:
+        #     # 创建新的派生变量列名
+        #     new_col_name = f'{feat1}_div_{feat2}'
+        #     df[new_col_name] = df[feat1] / (df[feat2] + 1e-10)
+        # warnings.filterwarnings("default", category=PerformanceWarning, message="DataFrame is highly fragmented.")
+
+        # 预分配内存
+        new_features = np.empty((len(df), len(combinations)))
+        new_feature_names = []
+        # 使用numpy进行批量计算
+        for i, (feat1, feat2) in enumerate(combinations):
+            new_features[:, i] = df[feat1].values / (df[feat2].values + 1e-10)
+            new_feature_names.append(f'{feat1}_div_{feat2}')
+        # 一次性添加所有新特征
+        # print value count of new_feature_names if value count is greater than 1, print
+
+        df = pd.concat([df, pd.DataFrame(new_features, columns=new_feature_names, index=df.index)], axis=1)
+
         logger.info(f"Derived features: {df.columns[df.columns.str.contains('_div_')][:5]} ...")
+        logger.info(f"duplicated column names: {df.columns[df.columns.duplicated()]}")
+
         return df
 
 class FeatureFilter:
@@ -141,9 +156,10 @@ class Preprocessor:
         result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
         df = df.drop(columns=result_cols[df[result_cols].nunique() <= 1])
 
-        ## remove columns with any NaN values
+        ## remove other columns with any NaN values
         other_cols = [col for col in df.columns if col not in result_cols]
-        df = df.dropna(subset=other_cols, how='any')
+        df = df.dropna(subset= other_cols, how='any')
+        df = df.dropna(subset = [self.target_column], how='any')
 
         return df
     
@@ -169,14 +185,44 @@ class Preprocessor:
     def _weighting(self, df: pd.DataFrame):
         logger.info(f"Weighting data by visitdurationgroup")
         # Group data by visitdurationgroup and calculate weights
-        warnings.filterwarnings("ignore", category=PerformanceWarning, message="DataFrame is highly fragmented")
-        df['visitdurationgroup'] = pd.cut(df['VisitDuration'], 
-                                          bins=[0, 42, 365, 1095, 1825,10000], 
-                                          labels=["<6w", "6w-1y", "1-3y", "3-5y", "5y+"], ordered=True, right=False)
-        warnings.filterwarnings("default", category=PerformanceWarning, message="DataFrame is highly fragmented")
-        df = df.dropna(subset=['visitdurationgroup'])
-        weights = df['visitdurationgroup'].value_counts(normalize=True)
-        df['sample_weight'] = df['visitdurationgroup'].map(lambda x: 1 / (weights[x] + 1e-10))
+        # warnings.filterwarnings("ignore", category=PerformanceWarning, message="DataFrame is highly fragmented")
+        # df['visitdurationgroup'] = pd.cut(df['VisitDuration'], 
+        #                                   bins=[0, 42, 365, 1095, 1825,10000], 
+        #                                   labels=["<6w", "6w-1y", "1-3y", "3-5y", "5y+"], ordered=True, right=False)
+        # warnings.filterwarnings("default", category=PerformanceWarning, message="DataFrame is highly fragmented")
+
+        # weights = df['visitdurationgroup'].value_counts(normalize=True)
+        # df['sample_weight'] = df['visitdurationgroup'].map(lambda x: 1 / (weights[x] + 1e-10))
+        # 使用 numpy 进行分组计算
+        bins = [0, 42, 365, 1095, 1825,10000]
+        labels = ["<6w", "6w-1y", "1-3y", "3-5y", "5y+"]
+
+        # 将 VisitDuration 转换为 numpy 数组
+        visit_duration = df['VisitDuration'].values
+        
+        # 使用 numpy 的 digitize 函数进行分组
+        try:
+            group_indices = np.digitize(visit_duration, bins, right=False)
+            # unique, counts = np.unique(group_indices, return_counts=True)
+            # logger.info(f"value count of groupindices: {dict(zip(unique, counts))}")
+
+        except Exception as e:
+            logger.error(f"Error in digitize: {e}")
+            # print the visit_duration of which group is NaN
+            nan_indices = np.isnan(visit_duration)
+            nan_visit_duration = visit_duration[nan_indices]
+            logger.error(f"NaN VisitDuration: {nan_visit_duration}")
+            raise e
+        
+        # 创建 visitdurationgroup 列
+        df['visitdurationgroup'] = pd.Categorical.from_codes(group_indices - 1, categories=labels, ordered=True)
+        logger.info(df['visitdurationgroup'].value_counts())
+        # 计算权重
+        value_counts = df['visitdurationgroup'].value_counts(normalize=True)
+        df['sample_weight'] = df['visitdurationgroup'].map(lambda x: 1 / (value_counts[x] + 1e-10))
+        logger.info(f"sample_weight for each visitdurationgroup: {df['sample_weight'].value_counts()}")
+        # print duplicated column names in df
+        logger.info(f"duplicated column names: {df.columns[df.columns.duplicated()]}")
         return df
     
     def _subsetting(self, df: pd.DataFrame, pick_key: str):

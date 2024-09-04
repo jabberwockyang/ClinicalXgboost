@@ -4,20 +4,21 @@ import os
 import matplotlib.pyplot as plt
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
 from boruta import BorutaPy
 import seaborn as sns
-from utils import preprocess_data, load_data, load_config, augment_samples, load_feature_list_from_boruta_file
+from utils import load_data, load_config, augment_samples, load_feature_list_from_boruta_file
 from best_params import opendb, get_best_params
-from preprocessor import Preprocessor, FeatureFilter, FeatureDrivator
+from preprocessor import Preprocessor, FeatureDrivator
 from loguru import logger
 from concurrent.futures import ThreadPoolExecutor
 import queue
 import argparse
 import uuid
 
-def main(filepath,  params, preprocessor):
-    paramcopy = params.copy()
+class PoisonPill:
+    pass
+
+def main(filepath,  params, preprocessor,logdir):
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     custom_metric_key = params.pop('custom_metric')
@@ -41,9 +42,8 @@ def main(filepath,  params, preprocessor):
     # 初始化一个 Xgboost 回归模型
     rf = xgb.XGBRegressor(n_estimators = n_estimators,**params)
     # 初始化一个 DataFrame 来存储特征排名
-    # ranking_df = pd.DataFrame(columns=X.columns)
-    # confirmed_vars_list = []
-    # output_queue = queue.Queue()
+    ranking_df = pd.DataFrame(columns=X.columns)
+    output_queue = queue.Queue()
 
     def run_boruta(X, y, i):
         print(f"Iteration {i+1}")
@@ -52,29 +52,46 @@ def main(filepath,  params, preprocessor):
     
         # 初始化Boruta特征选择器
         boruta_selector = BorutaPy(rf, n_estimators=n_estimators, verbose=2, 
-                                   random_state=i, max_iter=50)
+                                   random_state=i, max_iter=10)
     
         boruta_selector.fit(X_train, y_train)
         confirmed_vars = X.columns[boruta_selector.support_]
         feature_ranks = boruta_selector.ranking_
-        yield i+1, confirmed_vars, feature_ranks
-        # output_queue.put((i+1, confirmed_vars, feature_ranks))
+        logger.info(f"Iteration {i+1} finished")
+        output_queue.put((i+1, confirmed_vars, feature_ranks))
+        logger.info(f"Iteration {i+1} put into queue")
+
+    def get_and_write(output_queue):
+        while True:
+            item = output_queue.get()
+            if isinstance(item, PoisonPill):
+                logger.info(f"PoisonPill received, exiting...")
+                return
+            elif isinstance(item, tuple):
+                i, confirmed_vars, feature_ranks = item
+                ranking_df.loc[i] = feature_ranks
+                ranking_df.to_csv(os.path.join(log_dir,'ranking_df.csv'))
+                
+                with open(os.path.join(log_dir, 'confirmed_vars.txt'), 'a') as f:
+                    f.write(f"{i},{','.join(confirmed_vars)}\n")
+            else:
+                raise ValueError(f"Invalid item type: {type(item)}")
 
     # 使用多线程执行 Boruta
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        futures = [executor.submit(run_boruta, X, y, i) for i in range(20)]
-        for future in futures:
-            yield from future.result()  # 等待所有线程完成
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        consumer = executor.submit(get_and_write, output_queue)
+        producers = [executor.submit(run_boruta, X, y, i) for i in range(20)]
+        for future in producers:
+            future.result()  # 等待所有线程完成
+        logger.info(f"All threads finished, sending PoisonPill...")
+        output_queue.put(PoisonPill())
+        logger.info(f"PoisonPill sent")
 
-    # 从队列中获取结果并更新 ranking_df
-    # while not output_queue.empty():
-    #     i, confirmed_vars, feature_ranks = output_queue.get()
-    #     ranking_df.loc[i] = feature_ranks
-    #     confirmed_vars_list.append(confirmed_vars)
+        re = consumer.result()
+        logger.info(f"Consumer result: {re}")
 
-    # return ranking_df, confirmed_vars_list # return the last confirmed vars 
 
-def plot_boruta(ranking_df, log_dir, name = 'boruta'):
+def plot_boruta(ranking_df,log_dir, name = 'boruta'):
     numeric_ranking_df = ranking_df.apply(pd.to_numeric, errors='coerce')
 
     median_values = numeric_ranking_df.median()
@@ -155,14 +172,9 @@ if __name__ == "__main__":
     preprocessor = Preprocessor(target_column,
                                  groupingparams,
                                  feature_derive = fd)
-    ranking_df = pd.DataFrame()
 
-    for i, confirmed_vars, feature_ranks in main(filepath, best_param, preprocessor):
-        with open(os.path.join(log_dir, 'ranking_df.csv'),'a') as f:
-            f.write(f"{i},{','.join(map(str, feature_ranks))}\n")
-            ranking_df.loc[i] = feature_ranks
-        with open(os.path.join(log_dir, 'confirmed_vars.txt'), 'a') as f:
-            f.write(f"{i},{','.join(confirmed_vars)}\n")
+    main(filepath, best_param, preprocessor, log_dir)
 
+    ranking_df = pd.read_csv(os.path.join(log_dir, 'ranking_df.csv'))
     plot_boruta(ranking_df, log_dir)
     plot_boruta_by_group(ranking_df, log_dir)
