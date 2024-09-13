@@ -7,6 +7,8 @@ import itertools
 from loguru import logger
 from utils import load_config
 from pandas.errors import PerformanceWarning
+
+
 def get_asso_feat(feat, featlist):
     '''
     feat: str, feature to be associated
@@ -66,16 +68,21 @@ class FeatureFilter:
         when method is selection, features_list is used as a list of features to be selected
         '''
         self.target_column = target_column
+        # when filterer is instanced as sorting method filter function must be called with topn
+
         self.method = method
         if method not in ['sorting', 'selection']:
             raise ValueError("Invalid method")
         self.features_list = features_list
 
     def filter(self, df: pd.DataFrame, **kwargs):
+        # topn is provided anyway when no topn is set in search space it is None
         if self.method == 'sorting':
+            # when method is sorting, topn must be provided
             topn = kwargs.get('topn', None)
             return self._sorting(df, topn)
         elif self.method == 'selection':
+            # when method is selection, topn is not used
             return self._selection(df)
     
     def _sorting(self, df: pd.DataFrame, topn: int|float|None):
@@ -92,7 +99,7 @@ class FeatureFilter:
                     based on pick topn: {topn} in {len(original_features_to_use)} features 
                     in the order of importance provided: {self.features_list[:5]} ...""")
         if topn is None: # only when topn is not provided in search space will it be None
-            raise ValueError("topn is not found in search space while FeatureFilter is instanced pls check")
+            raise ValueError("topn is not found in search space while FeatureFilter is instanced as sorter pls check")
         # search space topn is either a list of int greater than 1 with -1 suggesting using all features or a float between 0 and 1 with 1 suggesting using all features
         if topn > 1: # topn is an integer
             topn = topn
@@ -283,9 +290,9 @@ class Preprocessor:
 
         # feature filtering if specified
         if self.feature_filter is not None:
-            # when filtration is instanced, topn is usually provided as int
-            # when no topn in search space topn is None if the filterer is instanced it will trigger error
-            df = self.feature_filter.filter(df, topn=topn)
+            # topn is provided as None when no topn is set in search space 
+            df = self.feature_filter.filter(df, topn=topn) 
+        # if no filterer is instanced then all features are used
         logger.info(f"Preprocessed data head: {df.head()}")
         
         X = df.drop(columns=[self.target_column, 'sample_weight','agegroup', 'visitdurationgroup'])
@@ -299,10 +306,16 @@ class Preprocessor:
         return X, y, sample_weight
 
 if __name__ == "__main__":
+    from sklearn.model_selection import train_test_split
+    import xgboost as xgb
     df = pd.read_csv('output/dataforxgboost_ac.csv')
     groupingparams = load_config('groupingsetting.yml')['groupingparams']
     pp = Preprocessor(target_column='VisitDuration', groupingparams=groupingparams)
-    X, y, sample_weight = pp.preprocess(df)
+    X, y, sample_weight = pp.preprocess(df, scale_factor=1, log_transform='log2', pick_key='all', topn=10)
+    X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
+    print(type(X_train))
+    print(X_train.dtype)  # Check the data types of each column
+    dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
     print(X.head())
     print(y.head())
     print(sample_weight.head())

@@ -18,7 +18,7 @@ import uuid
 class PoisonPill:
     pass
 
-def main(filepath,  params, preprocessor,logdir):
+def main(filepath,  params, preprocessor, experiment_name, log_dir, max_iteration = 50):
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     custom_metric_key = params.pop('custom_metric')
@@ -46,20 +46,20 @@ def main(filepath,  params, preprocessor,logdir):
     output_queue = queue.Queue()
 
     def run_boruta(X, y, i):
-        print(f"Iteration {i+1}")
+        logger.info(f"experiment {experiment_name}: Iteration {i+1}")
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=i)
     
         # 初始化Boruta特征选择器
         boruta_selector = BorutaPy(rf, n_estimators=n_estimators, verbose=2, 
-                                   random_state=i, max_iter=10)
+                                   random_state=i, max_iter=max_iteration)
     
         boruta_selector.fit(X_train, y_train)
         confirmed_vars = X.columns[boruta_selector.support_]
         feature_ranks = boruta_selector.ranking_
-        logger.info(f"Iteration {i+1} finished")
+        logger.info(f"experiment {experiment_name}: Iteration {i+1} finished")
         output_queue.put((i+1, confirmed_vars, feature_ranks))
-        logger.info(f"Iteration {i+1} put into queue")
+        logger.info(f"experiment {experiment_name}: Iteration {i+1} put into queue")
 
     def get_and_write(output_queue):
         while True:
@@ -89,6 +89,7 @@ def main(filepath,  params, preprocessor,logdir):
 
         re = consumer.result()
         logger.info(f"Consumer result: {re}")
+        
 
 
 def plot_boruta(ranking_df,log_dir, name = 'boruta'):
@@ -132,6 +133,7 @@ def argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--filepath', type=str)
     parser.add_argument('--best_db_path', type=str)
+    parser.add_argument('--max_iteration', type=int, default=50)
 
     parser.add_argument('--target_column', type=str, default='VisitDuration')
     parser.add_argument('--log_dir', type=str, default='boruta_explog')
@@ -173,7 +175,8 @@ if __name__ == "__main__":
                                  groupingparams,
                                  feature_derive = fd)
 
-    main(filepath, best_param, preprocessor, log_dir)
+    max_iteration = args.max_iteration
+    main(filepath, best_param, preprocessor, experiment_name, log_dir, max_iteration)
 
     ranking_df = pd.read_csv(os.path.join(log_dir, 'ranking_df.csv'))
     plot_boruta(ranking_df, log_dir)

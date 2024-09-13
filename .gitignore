@@ -1,8 +1,4 @@
 # only ignore nni1_explog in the root directory .gitignore file
-/nni1_explog
-/nni2_explog
-/nni3_explog
-/nni4_explog
-/nni5_explog
+/nni*_explog
 /gr_explog
 .vscode

@@ -35,7 +35,7 @@ def convert_floats(o):
         return [convert_floats(v) for v in o]
     return o
 
-def LoadFeatures(filepath):
+def LoadFeaturesfromnniimportance(filepath):
     if filepath is None:
         return None
     with open(filepath, 'r') as f:
@@ -489,3 +489,14 @@ def load_feature_list_from_boruta_file(boruta_file:str):
     intersected_vars = set.intersection(*map(set, new_varlist))
     logger.info(f"Found {len(intersected_vars)} common variables in all the lists")
     return list(intersected_vars)
+
+if __name__ == '__main__':
+    l = load_feature_list_from_boruta_file('boruta_explog/09647097-60b1-4c47-bc04-47eb678f73ea/confirmed_vars.txt')
+    print('boruta selection with no derived features')
+    print(l)
+    l1 = load_feature_list_from_boruta_file('boruta_explog/bfa01a02-738f-4570-9031-9884a3202a07/confirmed_vars.txt')
+    print('boruta selection with derived features')
+    print(l1)
+    l2 = load_feature_list_from_boruta_file('boruta_explog/70e68ddc-06c0-4778-ad89-231ceba214ad/confirmed_vars.txt')
+    print('boruta selection with derived features try2')
+    print(l2)

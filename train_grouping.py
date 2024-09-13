@@ -9,13 +9,11 @@ import json
 from loguru import logger
    
 from best_params import opendb, get_best_params
-from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, LoadFeatures, sorted_features_list
-
+from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, sorted_features_list, load_feature_list_from_boruta_file
+from preprocessor import Preprocessor, FeatureDrivator, FeatureFilter
 
 # 主函数
-def main(filepath, target_column, log_dir, params, 
-         groupingparams: Dict[str, List[str]] , label_toTrain: List[str],
-         features_for_deri = None, sorted_features = None):
+def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
     paramcopy = params.copy()
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
@@ -32,13 +30,19 @@ def main(filepath, target_column, log_dir, params,
             if os.path.exists(final_marker):
                 logger.info(f"Model already trained for {k}")
                 continue
-            X, y, sample_weight = preprocess_data(data, target_column, 
-                                                scale_factor,log_transform, 
-                                                groupingparams, 
-                                                pick_key = k,
-                                                feature_derivation = features_for_deri,
-                                                topn = topn,
-                                                sorted_features = sorted_features)
+            # X, y, sample_weight = preprocess_data(data, target_column, 
+            #                                     scale_factor,log_transform, 
+            #                                     groupingparams, 
+            #                                     pick_key = k,
+            #                                     feature_derivation = features_for_deri,
+            #                                     topn = topn,
+            #                                     sorted_features = sorted_features)
+
+            X, y, sample_weight = preprocessor.preprocess(data,
+                                                        scale_factor,
+                                                        log_transform,
+                                                        pick_key= k,
+                                                        topn=topn) # topn in transmitted anyway when no topn in searchspace is set to None
             if X.shape[0] == 0:
                 logger.info(f"No data for {k}")
                 continue
@@ -130,8 +134,6 @@ if __name__ == "__main__":
         os.makedirs(current_exp_stp)
     filepath = train_config['filepath']
     target_column = train_config['target_column']
-    features_for_deri = LoadFeatures(train_config['dvpath'])
-    sorted_features = sorted_features_list(train_config['importance_sorting'])
     
     # 分组参数
     label_toTrain = train_config['label_toTrain']
@@ -139,6 +141,34 @@ if __name__ == "__main__":
                       'bins': train_config['groupingparams']['bins'],
                       'labels': train_config['groupingparams']['labels']}
 
+    # 可选参数处理
+    # feature derivation
+    features_for_deri = load_feature_list_from_boruta_file(train_config['features_for_derivation']) if train_config['features_for_derivation'] else None
+    # feature selection
+    method =  train_config['variable_selection_method']
+
+    if method is None:
+        pass
+    elif method == 'sorting':
+        # must have topn in search space
+        logger.debug("Using sorting method for variable selection, please make sure search space contains topn parameter")
+        # must provide features_list
+        assert train_config['features_list'] is not None, "features_list must be provided for sorting method"
+        sorted_features = load_feature_list_from_boruta_file(train_config['features_list'])
+    elif method == 'selection':
+        logger.debug("Using selection method for variable selection, please make sure search space contains features_list parameter")
+        assert train_config['features_list'] is not None, "features_list must be provided for selection method"
+        sorted_features = load_feature_list_from_boruta_file(train_config['features_list'])
+    else:
+        raise ValueError(f"Invalid variable selection method: {method}, please choose from 'sorting' or 'selection'")
+    # 实例化特征衍生和特征选择
+
+    fd = FeatureDrivator(features_for_deri) if features_for_deri else None
+    ff = FeatureFilter(target_column, method= method, features_list=sorted_features) if method else None
+    # 实例化预处理器
+    pp = Preprocessor(target_column, groupingparams,
+                      feature_derive=fd,
+                      FeaturFilter=ff)
     # 实验日志目录
     experiment_id = f'{best_exp_id}_{"&".join([m[0] for m in metric_to_optimize])}_top{number_of_trials}_gr{train_config["grouping_parameter_id"]}'
     if not os.path.exists(f'{current_exp_stp}/{experiment_id}'):
@@ -154,10 +184,7 @@ if __name__ == "__main__":
             os.makedirs(log_dir)
 
         # 训练模型
-        main(filepath, target_column, log_dir, 
-                           best_params, 
-                           groupingparams, label_toTrain,
-                           features_for_deri, sorted_features)
+        main(filepath, pp, log_dir, best_params, label_toTrain)
 
 
 

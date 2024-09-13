@@ -119,7 +119,7 @@ done
 # try boruta
 python3 runboruta.py
 
-#during boruta discover problem with imputation run nni1 again and grouping and importance
+#during boruta discover problem with imputation run nni1 again and grouping and importance not done
 
 # BORUTA shows good performance in feature selection   
 
@@ -140,3 +140,17 @@ best_expid=BD3oGFia
 best_db_path=nni5_explog/$best_expid/db/nni.sqlite
 python3 runboruta.py --filepath output/dataforxgboost_ac.csv --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml --best_db_path $best_db_path --features_for_derivation boruta_explog/09647097-60b1-4c47-bc04-47eb678f73ea/confirmed_vars.txt
 
+# found that boruta select less features with derived features
+# 2024-09-13 12:23:49.693 | INFO     | __main__:load_feature_list_from_boruta_file:490 - Found 42 common variables in all the lists
+# boruta selection with no derived features
+# ['AbsoluteBasophilCount', 'MeanPlateletVolume', 'Hemoglobin', 'PlateletDistributionWidth', 'AbsoluteEosinophilCount', 'DogDander', 'MeanCorpuscularHemoglobinConcentration', 'MeanCorpuscularHemoglobin', 'SMRNP', 'Cockroach', 'AntiSM', 'AntiScl70', 'TotalThyroxine', 'Histone', 'RedCellDistributionWidth', 'NeutrophilsPercentage', 'WhiteBloodCellCount', 'RedCellDistributionWidthCV', 'AntiSSA', 'EggWhite', 'AntiM2', 'AbsoluteMonocyteCount', 'AntiJo1', 'FreeThyroxine', 'Ragweed', 'AbsoluteNeutrophilCount', 'MeanCorpuscularVolume', 'Plateletcrit', 'EosinophilCountAbsolute', 'AbsoluteLymphocyteCount', 'ThyroidStimulatingHormone', 'ProliferatingCellNuclearAntigen', 'Ro52', 'EosinophilsPercentage', 'AntiDoubleStrandedDNA', 'LymphocytesPercentage', 'ImmunoglobulinE', 'MonocytesPercentage', 'BasophilsPercentage', 'PlateletCount', 'TotalTriiodothyronine', 'CReactiveProtein']
+# 2024-09-13 12:23:49.699 | INFO     | __main__:load_feature_list_from_boruta_file:490 - Found 26 common variables in all the lists
+# boruta selection with derived features
+# ['AbsoluteBasophilCount', 'MeanPlateletVolume', 'Hemoglobin', 'PlateletDistributionWidth', 'AbsoluteEosinophilCount', 'DogDander', 'MeanCorpuscularHemoglobinConcentration', 'MeanCorpuscularHemoglobin', 'AntiScl70', 'TotalThyroxine', 'NeutrophilsPercentage', 'AntiM2', 'AbsoluteMonocyteCount', 'Ragweed', 'AbsoluteNeutrophilCount', 'MeanCorpuscularVolume', 'EosinophilCountAbsolute', 'AbsoluteLymphocyteCount', 'ProliferatingCellNuclearAntigen', 'EosinophilsPercentage', 'LymphocytesPercentage', 'ImmunoglobulinE', 'MonocytesPercentage', 'BasophilsPercentage', 'PlateletCount', 'TotalTriiodothyronine']
+# (nni) (base) root@intern-studio-40073620:~/ClinicalXgboost# 
+
+# retry with larger number of iterations
+
+best_expid=BD3oGFia
+best_db_path=nni5_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost_ac.csv --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml --best_db_path $best_db_path --features_for_derivation boruta_explog/09647097-60b1-4c47-bc04-47eb678f73ea/confirmed_vars.txt --max_iteration 100
