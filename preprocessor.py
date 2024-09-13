@@ -127,6 +127,7 @@ class FeatureFilter:
         for feat in self.features_list:
             assofeat = get_asso_feat(feat, df.columns)
             features_to_use.extend(assofeat)
+            features_to_use = list(set(features_to_use))
 
         logger.info(f"""Filtering features using selection method based on features provided: 
                     {self.features_list[:5]} ...
@@ -167,7 +168,11 @@ class Preprocessor:
         other_cols = [col for col in df.columns if col not in result_cols]
         df = df.dropna(subset= other_cols, how='any')
         df = df.dropna(subset = [self.target_column], how='any')
-
+        # print the columns with NaN values
+        logger.info(f"Columns with NaN values: {df.columns[df.isna().any()]}")
+        logger.debug(f"""
+                    {df.head()}
+                     """)
         return df
     
     def _imputation(self, df: pd.DataFrame):
@@ -187,7 +192,13 @@ class Preprocessor:
                 lambda x: x.fillna(x.median() if not np.isnan(x.median()) else overall_median)
             )
         warnings.filterwarnings("default", category=RuntimeWarning, message="Mean of empty slice")
-        return df
+        # print the columns with NaN values
+        logger.info(f"Columns with NaN values: {df.columns[df.isna().any()]}")
+
+        logger.debug(f"""
+                    {df.head()}
+                     """)
+        return df 
     
     def _weighting(self, df: pd.DataFrame):
         logger.info(f"Weighting data by visitdurationgroup")
@@ -230,6 +241,9 @@ class Preprocessor:
         logger.info(f"sample_weight for each visitdurationgroup: {df['sample_weight'].value_counts()}")
         # print duplicated column names in df
         logger.info(f"duplicated column names: {df.columns[df.columns.duplicated()]}")
+        logger.debug(f"""
+                    {df.head()}
+                     """)
         return df
     
     def _subsetting(self, df: pd.DataFrame, pick_key: str):
@@ -239,6 +253,9 @@ class Preprocessor:
             df = df[df['agegroup'] == pick_key]
         else:
             pass
+        logger.debug(f"""
+                    {df.head()}
+                     """)
         return df
     
     def _scalingX(self, df: pd.DataFrame):
@@ -247,6 +264,12 @@ class Preprocessor:
         result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
         for col in result_cols:
             df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
+        df = df.dropna(axis=1, how='all')
+
+        logger.debug(f"""
+                    {df.head()}
+                     """)
+        # remove columns with all NaN values
         return df
 
     def _scalingY(self, df: pd.DataFrame, scale_factor, log_transform):
@@ -259,6 +282,9 @@ class Preprocessor:
             df[self.target_column] = np.log10(df[self.target_column])
         else:
             pass
+        logger.debug(f"""
+                    {df.head()}
+                     """)
         return df
     
     def preprocess(self, df: pd.DataFrame, 
@@ -311,10 +337,9 @@ if __name__ == "__main__":
     df = pd.read_csv('output/dataforxgboost_ac.csv')
     groupingparams = load_config('groupingsetting.yml')['groupingparams']
     pp = Preprocessor(target_column='VisitDuration', groupingparams=groupingparams)
-    X, y, sample_weight = pp.preprocess(df, scale_factor=1, log_transform='log2', pick_key='all', topn=10)
+    X, y, sample_weight = pp.preprocess(df, scale_factor=1, log_transform='log2', pick_key='55+', topn=10)
     X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
     print(type(X_train))
-    print(X_train.dtype)  # Check the data types of each column
     dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
     print(X.head())
     print(y.head())

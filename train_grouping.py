@@ -146,7 +146,10 @@ if __name__ == "__main__":
     features_for_deri = load_feature_list_from_boruta_file(train_config['features_for_derivation']) if train_config['features_for_derivation'] else None
     # feature selection
     method =  train_config['variable_selection_method']
-
+    f = train_config['features_list'].split("/")[1].split('-')[0] if method else None
+    filterationparam = f'{method}_{f}' if f else None
+    d = train_config['features_for_derivation'].split("/")[1].split("-")[0] if features_for_deri else None
+    derivativeparam = f'deri_{d}' if d else None
     if method is None:
         pass
     elif method == 'sorting':
@@ -171,6 +174,8 @@ if __name__ == "__main__":
                       FeaturFilter=ff)
     # 实验日志目录
     experiment_id = f'{best_exp_id}_{"&".join([m[0] for m in metric_to_optimize])}_top{number_of_trials}_gr{train_config["grouping_parameter_id"]}'
+    experiment_id += f"_{filterationparam}" if filterationparam else ''
+    experiment_id += f"_{derivativeparam}" if derivativeparam else ''
     if not os.path.exists(f'{current_exp_stp}/{experiment_id}'):
         os.makedirs(f'{current_exp_stp}/{experiment_id}')
     topparams = [p[1] for p in ls_of_params]
@@ -178,7 +183,7 @@ if __name__ == "__main__":
         json.dump(convert_floats(topparams), f, ensure_ascii=False, indent=4)
    
     for best_param_id, best_params, sequence_ids in ls_of_params:
-        foldername = str(best_exp_id)+ '_' + str(best_param_id) + '_' + str(train_config['grouping_parameter_id'])
+        foldername = str(best_exp_id)+ '_' + str(best_param_id) + '_' + str(train_config['grouping_parameter_id']) 
         log_dir = f'{current_exp_stp}/{experiment_id}/{foldername}'
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)

@@ -500,3 +500,6 @@ if __name__ == '__main__':
     l2 = load_feature_list_from_boruta_file('boruta_explog/70e68ddc-06c0-4778-ad89-231ceba214ad/confirmed_vars.txt')
     print('boruta selection with derived features try2')
     print(l2)
+    l3 = load_feature_list_from_boruta_file('boruta_explog/fcd9f840-fb57-42be-bbaf-c033710f050c/confirmed_vars.txt')
+    print('boruta selection with derived features try with maxiteration 100')
+    print(l3)

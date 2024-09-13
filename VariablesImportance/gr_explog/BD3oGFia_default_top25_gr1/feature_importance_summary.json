@@ -1,0 +1,149 @@
+[
+    {
+        "label": "0-2",
+        "n": 15,
+        "top_n": [
+            "Gender",
+            "LymphocytesPercentage_Avg",
+            "FirstVisitAge",
+            "LymphocytesPercentage_Max",
+            "Hematocrit_Avg",
+            "Hematocrit_Max",
+            "BasophilsPercentage_Avg",
+            "MonocytesPercentage_Avg",
+            "ImmunoglobulinE_Avg",
+            "PlateletCount_Max",
+            "CReactiveProtein_Avg_acute",
+            "AbsoluteEosinophilCount_Avg_chronic",
+            "WhiteBloodCellCount_Avg",
+            "AbsoluteNeutrophilCount_Max",
+            "LymphocytesPercentage_Min"
+        ]
+    },
+    {
+        "label": "12-25",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "Gender",
+            "Hematocrit_Avg",
+            "PlateletCount_Avg",
+            "LymphocytesPercentage_Max",
+            "LymphocytesPercentage_Avg",
+            "Hematocrit_Max",
+            "MeanCorpuscularVolume_Avg_chronic",
+            "MeanCorpuscularHemoglobin_Avg_chronic",
+            "Hematocrit_Min",
+            "PlateletCount_Max",
+            "CReactiveProtein_Avg_chronic",
+            "MonocytesPercentage_Min",
+            "PlateletCount_Min",
+            "MeanCorpuscularVolume_Max"
+        ]
+    },
+    {
+        "label": "2-6",
+        "n": 15,
+        "top_n": [
+            "LymphocytesPercentage_Max",
+            "FirstVisitAge",
+            "LymphocytesPercentage_Avg",
+            "Hematocrit_Avg",
+            "MeanCorpuscularVolume_Avg_chronic",
+            "Gender",
+            "Hematocrit_Max",
+            "LymphocytesPercentage_Min",
+            "MeanPlateletVolume_Avg_chronic",
+            "PlateletDistributionWidth_Avg",
+            "BasophilsPercentage_Avg",
+            "Plateletcrit_Avg_chronic",
+            "LymphocytesPercentage_Avg_chronic",
+            "BasophilsPercentage_Avg_acute",
+            "WhiteBloodCellCount_Min"
+        ]
+    },
+    {
+        "label": "25-55",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "Hematocrit_Avg",
+            "LymphocytesPercentage_Max",
+            "Hematocrit_Max",
+            "LymphocytesPercentage_Avg",
+            "MonocytesPercentage_Max",
+            "MonocytesPercentage_Avg",
+            "MonocytesPercentage_Min",
+            "LymphocytesPercentage_Min",
+            "LymphocytesPercentage_Avg_chronic",
+            "PlateletCount_Avg",
+            "Hemoglobin_Min",
+            "Hematocrit_Min",
+            "NeutrophilsPercentage_Avg_chronic",
+            "PlateletCount_Max"
+        ]
+    },
+    {
+        "label": "55+",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "Hematocrit_Avg",
+            "LymphocytesPercentage_Max",
+            "Hematocrit_Max",
+            "Gender",
+            "LymphocytesPercentage_Avg",
+            "LymphocytesPercentage_Avg_chronic",
+            "MeanCorpuscularHemoglobin_Avg_chronic",
+            "EosinophilsPercentage_Avg_chronic",
+            "PlateletCount_Avg",
+            "LymphocytesPercentage_Min",
+            "MeanPlateletVolume_Avg",
+            "Hematocrit_Min",
+            "MeanPlateletVolume_Avg_acute",
+            "MonocytesPercentage_Avg"
+        ]
+    },
+    {
+        "label": "6-12",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "Gender",
+            "Hematocrit_Avg",
+            "LymphocytesPercentage_Avg",
+            "EosinophilCountAbsolute_Avg_chronic",
+            "LymphocytesPercentage_Max",
+            "Hematocrit_Max",
+            "MeanPlateletVolume_Min",
+            "MeanCorpuscularHemoglobin_Avg_chronic",
+            "MeanCorpuscularVolume_Avg",
+            "MeanPlateletVolume_Avg_chronic",
+            "NeutrophilsPercentage_Max",
+            "MeanCorpuscularVolume_Max",
+            "MeanPlateletVolume_Avg",
+            "LymphocytesPercentage_Min"
+        ]
+    },
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "Hematocrit_Avg",
+            "Gender",
+            "Hematocrit_Max",
+            "MeanCorpuscularHemoglobinConcentration_Avg_chronic",
+            "PlateletCount_Avg_chronic",
+            "LymphocytesPercentage_Avg",
+            "EosinophilCountAbsolute_Avg_chronic",
+            "CReactiveProtein_Avg_acute",
+            "LymphocytesPercentage_Min",
+            "MonocytesPercentage_Avg",
+            "MonocytesPercentage_Avg_chronic",
+            "LymphocytesPercentage_Max",
+            "MonocytesPercentage_Min",
+            "WhiteBloodCellCount_Avg"
+        ]
+    }
+]

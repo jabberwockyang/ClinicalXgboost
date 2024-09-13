@@ -1,0 +1,19 @@
+nni:
+  exp_stp: 'nni5_explog'
+  best_exp_id: 'BD3oGFia'
+  metric_to_optimize: 
+    - ["default", "minimize"]
+  number_of_trials: 25
+train:
+  exp_stp: 'gr_explog'
+  filepath: 'output/dataforxgboost_ac.csv'
+  target_column: 'VisitDuration'
+  features_for_derivation:
+  variable_selection_method: 'selection'
+  features_list: 'boruta_explog/09647097-60b1-4c47-bc04-47eb678f73ea/confirmed_vars.txt'
+  grouping_parameter_id: '1'
+  groupingparams: 
+    bins: [0, 2, 6, 12, 25, 55, 150]
+    labels: ['0-2', '2-6', '6-12', '12-25', '25-55', '55+']
+  label_toTrain: ['0-2', '2-6', '6-12', '12-25', '25-55', '55+', 'all']
+
