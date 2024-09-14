@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "FirstVisitAge",
+            "Hematocrit_Avg",
+            "Hematocrit_Max",
+            "MeanCorpuscularHemoglobinConcentration_Avg_chronic",
+            "LymphocytesPercentage_Avg",
+            "Gender",
+            "LymphocytesPercentage_Min",
+            "CReactiveProtein_Avg_acute",
+            "PlateletCount_Avg_chronic",
+            "MonocytesPercentage_Avg",
+            "EosinophilCountAbsolute_Avg_chronic",
+            "MonocytesPercentage_Min",
+            "MonocytesPercentage_Avg_chronic",
+            "LymphocytesPercentage_Max",
+            "EosinophilsPercentage_Avg_chronic"
+        ]
+    }
+]

@@ -1,0 +1,19 @@
+{
+    "max_depth": 2,
+    "min_child_weight": 2.966372228460007,
+    "gamma": 0.25209485991146413,
+    "colsample_bytree": 0.6755682822706203,
+    "learning_rate": 0.1,
+    "alpha": 0.05,
+    "objective": "count:poisson",
+    "num_boost_round": 200,
+    "custom_metric": "prerec_auc",
+    "scale_factor": 2,
+    "log_transform": "log2",
+    "early_stopping_rounds": 50,
+    "group": "12-25",
+    "loss": 109559.21875,
+    "max_roc_auc": 0.7342105263157895,
+    "max_prerec_auc": 0.7943536482960927,
+    "sequence_id": 0
+}

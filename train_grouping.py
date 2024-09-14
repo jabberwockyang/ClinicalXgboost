@@ -30,13 +30,6 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
             if os.path.exists(final_marker):
                 logger.info(f"Model already trained for {k}")
                 continue
-            # X, y, sample_weight = preprocess_data(data, target_column, 
-            #                                     scale_factor,log_transform, 
-            #                                     groupingparams, 
-            #                                     pick_key = k,
-            #                                     feature_derivation = features_for_deri,
-            #                                     topn = topn,
-            #                                     sorted_features = sorted_features)
 
             X, y, sample_weight = preprocessor.preprocess(data,
                                                         scale_factor,

@@ -7,7 +7,7 @@ import os
 from typing import Dict, List
 import json
 from loguru import logger
-from utils import load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, LoadFeatures, sorted_features_list, load_config, load_feature_list_from_boruta_file
+from utils import load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, load_config, load_feature_list_from_boruta_file
 from preprocessor import Preprocessor, FeatureDrivator, FeatureFilter
 
 # 主函数
@@ -36,12 +36,6 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
                                                   topn=topn)
     
 
-    # X, y, sample_weight = preprocess_data(data, target_column, 
-    #                                       scale_factor,log_transform, 
-    #                                         groupingparams,
-    #                                         pick_key= 'all',
-    #                                        feature_derivation = features_for_deri, 
-    #                                        topn=topn, sorted_features=sorted_features)
 
     # 划分训练集 验证集 测试集
     X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)

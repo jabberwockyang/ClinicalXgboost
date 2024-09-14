@@ -25,7 +25,7 @@ done
 
 
 
-# nni with derived variables nni2_explog
+# nni with derived variables nni2_explog derived variables was from top 15 variables ranked by importance in nni1
 nnictl create --config config_dv.yml --port 8081 # 3eQbjfcG  nnictl resume 3eQbjfcG --port 8081
 for expid in nni2_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
 for expid in nni2_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 25; done
@@ -49,7 +49,7 @@ done
 
 
 
-# nni with derived variables and topn nni3_explog
+# nni with derived variables and topn nni3_explog derived variables was from top 15 variables ranked by importance in nni2 and topn is in searchspace for nni3 
 nnictl create --config config_dv_topn.yml --port 8081 # 
 for expid in nni3_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
 # Loop through YAML files and run train_grouping.py for each experiment
@@ -71,7 +71,7 @@ done
 
 
 
-# nni with topn nni4_explog
+# nni with topn nni4_explog topn is in searchspace for nni4 no derived variables
 nnictl create --config config_topn.yml --port 7860
 for expid in nni4_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
 
@@ -100,7 +100,7 @@ for grfolder in gr_explog/*; do
     python3 importance.py --grdir "$grfolder"
 done
 
-# summary in variablesimportance shows no benefit of feature derivation and subsequent topn 
+# summary it shows no benefit of feature derivation and subsequent topn selection
 # use nni1 results for further analysis
 
 # try different grouping strategies
@@ -123,7 +123,7 @@ done
 # try boruta
 python3 runboruta.py
 
-#during boruta discover problem with imputation run nni1 again and grouping and importance not done
+#during boruta discover problem with imputation about to run nni1 again and grouping and importance not done
 
 # BORUTA shows good performance in feature selection   
 
@@ -193,36 +193,51 @@ for expid in nni5_explog/*; do
 done
 
 # what is the clinical significance ?
-# use acute data only
+# use acute data only acute avg min max
+## done in sqlquery
 
 # nni6 use acute data only
 nnictl create --config config_nni6.yml --port 8081 # ZpoUyrIC  nnictl resume ZpoUyrIC --port 8081
+# run importance for nni6
+for expid in nni6_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
+# results of acute data prediction was bad roc was about 0.6
 
-# boruta selection with acute data only
-best_expid=
-best_db_path=nni6_explog/$best_expid/db/nni.sqlite
-python3 runboruta.py --filepath output/dataforxgboost_a.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
+# nni7 use original min max avg data like nni1 but with new code
+nnictl create --config config_nni7.yml --port 8081 # ZpoUyrIC  nnictl resume ZpoUyrIC --port 8081
+# run importance for nni7
+for expid in nni7_explog/*; do python3 importance.py --nnidir $expid --metric default --minimize True --number_of_trials 7; done
 
-# group training with nni6 results
-for yml in grouping_nni6_*.yaml; do
-    for expid in nni6_explog/*; do
+# boruta selection with no derived features
+best_expid=ZpoUyrIC
+best_db_path=nni1_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
+
+# group training with nni7 results
+for yml in grouping_nni7*.yaml; do
+    for expid in nni7_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
     done
 done
 
-# group training with nni6 results + bselected features
-for yml in grouping_nni6_bselected_*.yaml; do
-    for expid in nni6_explog/*; do
+# group training with nni7 results + bselected features
+for yml in grouping_nni7_bselected_*.yaml; do
+    for expid in nni7_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
     done
 done
 
 # Run importance.py for each grouping experiment folder
-for expid in nni6_explog/*; do
+for expid in nni7_explog/*; do
     base_expid=$(basename "$expid")  # Extract base experiment ID
     for grfolder in gr_explog/${base_expid}*; do
         python3 importance.py --grdir "$grfolder"
     done
 done
+
+# group training with nni7 shows not so good as nni1 try to rerun nni1 params with new code and grouping 
+# group training with nni1 results again
+python3 train_grouping.py --config grouping_nni1_default_top7.yaml --expid ZpoUyrIC
+python3 importance.py --grdir gr_explog_retrey/ZpoUyrIC_default_top7_gr1
+# so problem is in new code 

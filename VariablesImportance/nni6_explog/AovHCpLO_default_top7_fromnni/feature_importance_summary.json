@@ -1,0 +1,23 @@
+[
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "MeanCorpuscularHemoglobinConcentration_Max_acute",
+            "AbsoluteEosinophilCount_Avg_acute",
+            "CReactiveProtein_Avg_acute",
+            "NeutrophilsPercentage_Avg_acute",
+            "MeanCorpuscularHemoglobinConcentration_Avg_acute",
+            "EosinophilsPercentage_Max_acute",
+            "AbsoluteNeutrophilCount_Min_acute",
+            "MeanPlateletVolume_Avg_acute",
+            "MeanCorpuscularHemoglobinConcentration_Min_acute",
+            "AbsoluteNeutrophilCount_Max_acute",
+            "AbsoluteNeutrophilCount_Avg_acute",
+            "WhiteBloodCellCount_Min_acute",
+            "MeanCorpuscularVolume_Max_acute",
+            "AbsoluteMonocyteCount_Avg_acute",
+            "Hemoglobin_Avg_acute"
+        ]
+    }
+]
