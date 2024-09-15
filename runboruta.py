@@ -78,7 +78,7 @@ def main(filepath,  params, preprocessor, experiment_name, log_dir, max_iteratio
                 raise ValueError(f"Invalid item type: {type(item)}")
 
     # 使用多线程执行 Boruta
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    with ThreadPoolExecutor(max_workers=12) as executor:
         consumer = executor.submit(get_and_write, output_queue)
         producers = [executor.submit(run_boruta, X, y, i) for i in range(20)]
         for future in producers:
