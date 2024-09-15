@@ -1,11 +1,11 @@
 
-
-# weights and topn strategy
-
 ```bash
 conda activate nni
 cd /root/ClinicalXgboost
 ```
+
+# weights and topn strategy
+
 
 ## nni1 
 data: feature engineering with min max avg of all records
@@ -350,19 +350,9 @@ python3 runboruta.py --filepath output/dataforxgboost_a.csv --best_db_path $best
 experiment id bc631828
 
 
-### run groupring with nni6 results
+### run groupring with nni6 results and  with nni6 results + bselected features
 ```bash
-for yml in grouping_nni6_*.yaml; do
-    for expid in nni6_explog/*; do
-        base_expid=$(basename "$expid")
-        python3 train_grouping.py --config "$yml" --expid "$base_expid"
-    done
-done
-```
-
-### group training with nni6 results + bselected features
-```bash
-for yml in grouping_nni6_bselected_*.yaml; do
+for yml in grouping_nni6_*.yaml; do 
     for expid in nni6_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
@@ -406,19 +396,9 @@ python3 runboruta.py --filepath output/dataforxgboost.csv --best_db_path $best_d
 experiment id 57d5c9dd
 
 
-### group training with nni7 results
+### group training with nni7 results and with nni7 results + bselected features
 ```bash
 for yml in grouping_nni7*.yaml; do
-    for expid in nni7_explog/*; do
-        base_expid=$(basename "$expid")
-        python3 train_grouping.py --config "$yml" --expid "$base_expid"
-    done
-done
-```
-
-### group training with nni7 results + bselected features
-```bash
-for yml in grouping_nni7_bselected_*.yaml; do
     for expid in nni7_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
@@ -461,7 +441,8 @@ python3 runboruta.py --filepath output/dataforxgboost_ap.csv --best_db_path $bes
 ```
 
 experiment id 6a7a1e15
-### group training with nni8 results
+
+### group training with nni8 results and with nni8 results + bselected features
 ```bash
 for yml in grouping_nni8*.yaml; do
     for expid in nni8_explog/*; do
@@ -471,12 +452,12 @@ for yml in grouping_nni8*.yaml; do
 done
 ```
 
-### group training with nni8 results + bselected features
+### Run importance.py for each grouping experiment folder
 ```bash
-for yml in grouping_nni8_bselected_*.yaml; do
-    for expid in nni8_explog/*; do
-        base_expid=$(basename "$expid")
-        python3 train_grouping.py --config "$yml" --expid "$base_expid"
+for expid in nni8_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --grdir "$grfolder"
     done
 done
 ```
