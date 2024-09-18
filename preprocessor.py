@@ -1,12 +1,11 @@
 import pandas as pd 
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import json
 import warnings
 import numpy as np
 import itertools
 from loguru import logger
 from utils import load_config
-from pandas.errors import PerformanceWarning
 
 
 def get_asso_feat(feat, featlist):
@@ -155,24 +154,26 @@ class Preprocessor:
     def _dropna(self, df: pd.DataFrame):
         logger.info(f"Dropping NaN values")
         # dropna
-        ## remove columns with all NaN values in CommonBloodTest
+
+        ## remove columns with only 1 unique value or all NaN
+        df = df.dropna(axis=1, how='all')
+        df = df.drop(columns=[col for col in df.columns if df[col].nunique() == 1])
+
+        ## remove rows with more than 50% NaN values in CommonBloodTest
         namelist = [x[1] for x in self.ExaminationItemClass['CommonBloodTest']]
         result_cols2 = df.columns[df.columns.str.contains("|".join(namelist))]
-        df = df.dropna(subset=result_cols2, how='all') 
+        df = df.dropna(subset=result_cols2, thresh= len(result_cols2) // 2)
 
-        ## remove columns in results_col with only 1 unique value or all NaN
-        result_cols = df.columns[df.columns.str.contains('Avg|Count|Sum|Max|Min|Median|Std|Skew|Kurt|Pct')]
-        df = df.drop(columns=result_cols[df[result_cols].nunique() <= 1])
 
-        ## remove other columns with any NaN values
-        other_cols = [col for col in df.columns if col not in result_cols]
-        df = df.dropna(subset= other_cols, how='any')
-        df = df.dropna(subset = [self.target_column], how='any')
+        ## remove rows with any NaN values in Gender,FirstVisitAge,VisitDuration,CIndU
+        df = df.dropna(subset= ['Gender','FirstVisitAge','VisitDuration','CIndU'], how='any', axis=0)
+        df = df.dropna(subset = [self.target_column], how='any', axis=0)
+        
         # print the columns with NaN values
         logger.info(f"Columns with NaN values: {df.columns[df.isna().any()]}")
-        logger.debug(f"""
-                    {df.head()}
-                     """)
+        # logger.debug(f"""
+        #             {df.head()}
+        #              """)
         return df
     
     def _imputation(self, df: pd.DataFrame):
@@ -195,9 +196,9 @@ class Preprocessor:
         # print the columns with NaN values
         logger.info(f"Columns with NaN values: {df.columns[df.isna().any()]}")
 
-        logger.debug(f"""
-                    {df.head()}
-                     """)
+        # logger.debug(f"""
+        #             {df.head()}
+        #              """)
         return df 
     
     def _weighting(self, df: pd.DataFrame):
@@ -241,9 +242,9 @@ class Preprocessor:
         logger.info(f"sample_weight for each visitdurationgroup: {df['sample_weight'].value_counts()}")
         # print duplicated column names in df
         logger.info(f"duplicated column names: {df.columns[df.columns.duplicated()]}")
-        logger.debug(f"""
-                    {df.head()}
-                     """)
+        # logger.debug(f"""
+        #             {df.head()}
+        #              """)
         return df
     
     def _subsetting(self, df: pd.DataFrame, pick_key: str):
@@ -253,9 +254,9 @@ class Preprocessor:
             df = df[df['agegroup'] == pick_key]
         else:
             pass
-        logger.debug(f"""
-                    {df.head()}
-                     """)
+        # logger.debug(f"""
+        #             {df.head()}
+        #              """)
         return df
     
     def _scalingX(self, df: pd.DataFrame):
@@ -266,9 +267,9 @@ class Preprocessor:
             df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
         df = df.dropna(axis=1, how='all')
 
-        logger.debug(f"""
-                    {df.head()}
-                     """)
+        # logger.debug(f"""
+        #             {df.head()}
+        #              """)
         # remove columns with all NaN values
         return df
 
@@ -282,9 +283,9 @@ class Preprocessor:
             df[self.target_column] = np.log10(df[self.target_column])
         else:
             pass
-        logger.debug(f"""
-                    {df.head()}
-                     """)
+        # logger.debug(f"""
+        #             {df.head()}
+        #              """)
         return df
     
     def preprocess(self, df: pd.DataFrame, 
@@ -332,6 +333,7 @@ class Preprocessor:
         return X, y, sample_weight
 
 if __name__ == "__main__":
+
     from sklearn.model_selection import train_test_split
     import xgboost as xgb
     df = pd.read_csv('output/dataforxgboost_ac.csv')

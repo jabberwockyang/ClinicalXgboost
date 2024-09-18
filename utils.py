@@ -263,10 +263,10 @@ def roc_auc_metric(y_test, y_pred):
 
 
 # 模型评估
-def evaluate_model(model, dtest, result_dir,scale_factor, log_transform):
+def evaluate_model(model, dtest, result_dir, scale_factor, log_transform):
     y_test = dtest.get_label()
     y_pred = model.predict(dtest)
-
+    # reverse log transform
     if log_transform == "log2":
         y_test_reversed = 2 ** y_test
         y_pred_reversed = 2 ** y_pred
@@ -444,6 +444,7 @@ def plot_roc_summary(df, outdir):
     sns.stripplot(data = df, x = 'group', y = 'max_roc_auc', color = 'orange', size = 6, jitter = 0.25)
     plt.xlabel('group')
     plt.ylabel('max_roc_auc')
+    plt.ylim(0.5, 1)
     plt.title('max_roc_auc in different group')
     plt.savefig(os.path.join(outdir, 'max_roc_auc.png'))
     plt.close()

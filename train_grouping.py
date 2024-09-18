@@ -36,6 +36,14 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
                                                         log_transform,
                                                         pick_key= k,
                                                         topn=topn) # topn in transmitted anyway when no topn in searchspace is set to None
+            
+            # concat x and y save to the log_dir
+            Xy = X.copy()
+            Xy['target'] = y
+            Xy.to_csv(f'{log_dir}/{k}/datapreprocessed.csv', index=False)
+            logger.info(f"Data preprocessed for {k} and saved")
+
+
             if X.shape[0] == 0:
                 logger.info(f"No data for {k}")
                 continue
@@ -46,6 +54,7 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
             dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
             dval = xgb.DMatrix(X_val, label=y_val, weight=sw_val)
             dtest = xgb.DMatrix(X_test, label=y_test, weight=sw_test)
+            dplot = xgb.DMatrix(X, label=y, weight=sample_weight)
 
             # 提取 custom_metric 字段 替换为自定义的评估函数
             custom_metric = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None

@@ -25,6 +25,7 @@ def plot_roc_summary(json_file):
     sns.stripplot(data = df, x = 'group', y = 'max_roc_auc', color = 'orange', size = 6, jitter = 0.25)
     plt.xlabel('group')
     plt.ylabel('max_roc_auc')
+    plt.ylim(0.5, 1)
     plt.title('max_roc_auc in different group')
     plt.savefig(json_file.replace('.json', '_roc_auc.png'))
 

@@ -35,7 +35,11 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
                                                   pick_key= 'all',
                                                   topn=topn)
     
-
+    # concat x and y save to the log_dir
+    Xy = X.copy()
+    Xy['target'] = y
+    experiment_id = nni.get_experiment_id()
+    Xy.to_csv(f'{log_dir}/{experiment_id}/datapreprocessed.csv', index=False)
 
     # 划分训练集 验证集 测试集
     X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)

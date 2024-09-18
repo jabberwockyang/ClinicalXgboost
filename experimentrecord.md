@@ -222,14 +222,17 @@ for expid in nni5_explog/*; do python3 importance.py --nnidir $expid --metric de
 
 ```
 experiment id BD3oGFia
+newsqlquery  experiment id 8Y9XvkQq
 
 ### boruta selection with no derived features
 ```bash
-best_expid=BD3oGFia
+best_expid=8Y9XvkQq
 best_db_path=nni5_explog/$best_expid/db/nni.sqlite
 python3 runboruta.py --filepath output/dataforxgboost_ac.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml 
 ```
 experiment id 09647097
+newsqlquery experiment id d2d8b927-0e09-44f5-890b-3016f1ea5d68
+
 
 ### boruta selection with derived features from selection using id 09647097
 ```bash 
@@ -272,7 +275,7 @@ boruta selection with derived features try with maxiteration 100
 
 feature engineering
 
-nni5: feature engineering with min max avg of all records and avg of acute and chronic records
+nni5: feature engineering with min max avg of acute and chronic records
 
 nni6: feature engineering with min max avg of acute records only
 
@@ -293,9 +296,9 @@ code: updated code
 ### reuse boruta results from nni5 09647097
 
 
-### group training with nni5 results
+### group training with nni5 results and with nni5 results + bselected features
 ```bash
-for yml in grouping_nni5_*.yaml; do
+for yml in grouping_nni5*.yaml; do
     for expid in nni5_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
@@ -303,15 +306,6 @@ for yml in grouping_nni5_*.yaml; do
 done
 ```
 
-### group training with nni5 results + bselected features
-```bash
-for yml in grouping_nni5_bselected_*.yaml; do
-    for expid in nni5_explog/*; do
-        base_expid=$(basename "$expid")
-        python3 train_grouping.py --config "$yml" --expid "$base_expid"
-    done
-done
-```
 
 ### Run importance.py for each grouping experiment folder
 ```bash
@@ -322,6 +316,10 @@ for expid in nni5_explog/*; do
     done
 done
 ```
+|nni|nni+boruta|
+|---|---|
+|![nni](VariablesImportance/gr_explog/8Y9XvkQq_default_top25_gr1/max_roc_auc.png)|![nni+boruta](VariablesImportance/gr_explog/8Y9XvkQq_default_top25_gr1_selection_d2d8b927/max_roc_auc.png)|
+
 
 ## nni6
 
@@ -350,9 +348,9 @@ python3 runboruta.py --filepath output/dataforxgboost_a.csv --best_db_path $best
 experiment id bc631828
 
 
-### run groupring with nni6 results and  with nni6 results + bselected features
+### group training with nni6 results and with nni6 results + bselected features
 ```bash
-for yml in grouping_nni6_*.yaml; do 
+for yml in grouping_nni6*.yaml; do 
     for expid in nni6_explog/*; do
         base_expid=$(basename "$expid")
         python3 train_grouping.py --config "$yml" --expid "$base_expid"
@@ -370,6 +368,9 @@ for expid in nni6_explog/*; do
 done
 ```
 
+|nni|nni+boruta|
+|---|---|
+|![nni](VariablesImportance/gr_explog/4jmrxVsX_default_top25_gr1/max_roc_auc.png)|![nni+boruta](VariablesImportance/gr_explog/4jmrxVsX_default_top25_gr1_selection_bc631828/max_roc_auc.png)|
 ## nni7
 
 data: feature engineering with min max avg of all records
@@ -415,6 +416,9 @@ for expid in nni7_explog/*; do
     done
 done
 ```
+|nni|nni+boruta|
+|---|---|
+|![nni](VariablesImportance/gr_explog/Itr01zQY_default_top25_gr1/max_roc_auc.png)|![nni+boruta](VariablesImportance/gr_explog/Itr01zQY_default_top25_gr1_selection_57d5c9dd/max_roc_auc.png)|
 
 ## nni8
 
@@ -459,5 +463,85 @@ for expid in nni8_explog/*; do
     for grfolder in gr_explog/${base_expid}*; do
         python3 importance.py --grdir "$grfolder"
     done
+done
+```
+|nni|nni+boruta|
+|---|---|
+|![nni](VariablesImportance/gr_explog/AhUO5lFk_default_top25_gr1/max_roc_auc.png)|![nni+boruta](VariablesImportance/gr_explog/AhUO5lFk_default_top25_gr1_selection_6a7a1e15/max_roc_auc.png)|
+
+
+
+
+
+## add data save code in train grouping code rerun all grouping yaml
+
+```bash
+
+for yml in grouping_nni*.yaml; do 
+    python3 train_grouping.py --config "$yml"
+done
+
+```
+
+## change preprocessor setting so the dropna threshold of commonbloodtest is 50% 
+
+### rerun all nni and check available data amount
+
+#### nni5
+```bash
+nnictl create --config config_nni5.yml --port 8081 
+nnictl resume CFBmkWQ1 --port 8081 
+```
+experiment id: CFBmkWQ1
+
+boruta
+```bash
+best_expid=CFBmkWQ1
+best_db_path=nni5_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost_ac.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml 
+```
+Experiment name: e5a86e18-dca6-49d1-a9c5-4955afa26f84
+
+
+
+##### nni6
+```bash
+nnictl create --config config_nni6.yml --port 7860
+```
+The experiment id is ia27HVx6
+```bash
+best_expid=ia27HVx6
+best_db_path=nni6_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost_a.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
+```
+ Experiment name: aa54898a-5bf4-419f-8422-4c4e91de67d2
+
+
+#### nni7
+```bash
+nnictl create --config config_nni7.yml --port 8000 
+```
+The experiment id is kiGBxqL6
+```bash
+best_expid=kiGBxqL6
+best_db_path=nni7_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
+```
+
+#### nni8 
+```bash
+nnictl create --config config_nni8.yml --port 6666 
+```
+The experiment id is agAUczMO
+```bash
+best_expid=agAUczMO
+best_db_path=nni8_explog/$best_expid/db/nni.sqlite
+python3 runboruta.py --filepath output/dataforxgboost_ap.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
+```
+
+### rerun all grouping
+```bash
+for yml in grouping_nni*.yaml; do 
+    python3 train_grouping.py --config "$yml"
 done
 ```

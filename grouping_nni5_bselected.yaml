@@ -1,0 +1,19 @@
+nni:
+  exp_stp: 'nni5_explog'
+  best_exp_id: 'CFBmkWQ1'
+  metric_to_optimize: 
+    - ["roc_auc", "maximize"]
+  number_of_trials: 1
+train:
+  exp_stp: 'gr_explog'
+  filepath: 'output/dataforxgboost_ac.csv'
+  target_column: 'VisitDuration'
+  features_for_derivation:
+  variable_selection_method: 'selection'
+  features_list: 'boruta_explog/e5a86e18-dca6-49d1-a9c5-4955afa26f84/confirmed_vars.txt'
+  grouping_parameter_id: '1'
+  groupingparams: 
+    bins: [0, 2, 6, 12, 25, 55, 150]
+    labels: ['0-2', '2-6', '6-12', '12-25', '25-55', '55+']
+  label_toTrain: ['0-2', '2-6', '6-12', '12-25', '25-55', '55+', 'all']
+

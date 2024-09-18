@@ -1,0 +1,149 @@
+[
+    {
+        "label": "0-2",
+        "n": 15,
+        "top_n": [
+            "MeanPlateletVolume_Max_chronic",
+            "PlateletCount_Min_acute",
+            "RedCellDistributionWidthCV_Min_chronic",
+            "AbsoluteEosinophilCount_Avg_chronic",
+            "MeanCorpuscularVolume_Max_chronic",
+            "NeutrophilsPercentage_Max_chronic",
+            "PlateletCount_Max_chronic",
+            "MeanCorpuscularHemoglobin_Min_acute",
+            "MeanCorpuscularVolume_Min_chronic",
+            "Ragweed_Avg_chronic",
+            "ImmunoglobulinE_Min_chronic",
+            "AbsoluteEosinophilCount_Max_acute",
+            "MeanPlateletVolume_Min_chronic",
+            "PlateletCount_Min_chronic",
+            "MeanCorpuscularVolume_Avg_acute"
+        ]
+    },
+    {
+        "label": "12-25",
+        "n": 15,
+        "top_n": [
+            "CReactiveProtein_Avg_chronic",
+            "PlateletCount_Min_chronic",
+            "EosinophilCountAbsolute_Max_chronic",
+            "MeanCorpuscularVolume_Max_chronic",
+            "MeanCorpuscularHemoglobin_Min_chronic",
+            "MeanCorpuscularVolume_Min_chronic",
+            "PlateletCount_Avg_chronic",
+            "Hematocrit_Max_chronic",
+            "MeanPlateletVolume_Max_chronic",
+            "CReactiveProtein_Avg_acute",
+            "MeanPlateletVolume_Min_chronic",
+            "AbsoluteEosinophilCount_Min_acute",
+            "EosinophilsPercentage_Max_acute",
+            "NeutrophilsPercentage_Avg_chronic",
+            "PlateletCount_Max_chronic"
+        ]
+    },
+    {
+        "label": "2-6",
+        "n": 15,
+        "top_n": [
+            "MeanPlateletVolume_Max_chronic",
+            "PlateletCount_Min_chronic",
+            "MeanCorpuscularVolume_Max_chronic",
+            "NeutrophilsPercentage_Max_chronic",
+            "AbsoluteEosinophilCount_Max_chronic",
+            "NeutrophilsPercentage_Avg_chronic",
+            "MeanCorpuscularVolume_Avg_chronic",
+            "MeanCorpuscularHemoglobin_Avg_chronic",
+            "Hematocrit_Max_chronic",
+            "BasophilsPercentage_Avg_acute",
+            "AbsoluteEosinophilCount_Avg_chronic",
+            "RedCellDistributionWidthCV_Max_chronic",
+            "MeanPlateletVolume_Min_chronic",
+            "EosinophilCountAbsolute_Avg_chronic",
+            "MeanPlateletVolume_Min_acute"
+        ]
+    },
+    {
+        "label": "25-55",
+        "n": 15,
+        "top_n": [
+            "MonocytesPercentage_Max_chronic",
+            "PlateletCount_Min_chronic",
+            "MeanPlateletVolume_Avg_acute",
+            "MeanCorpuscularHemoglobinConcentration_Avg_chronic",
+            "Hemoglobin_Min_chronic",
+            "Hematocrit_Max_chronic",
+            "CReactiveProtein_Avg_chronic",
+            "NeutrophilsPercentage_Avg_chronic",
+            "NeutrophilsPercentage_Min_acute",
+            "MeanPlateletVolume_Min_chronic",
+            "MeanCorpuscularHemoglobin_Avg_chronic",
+            "MeanPlateletVolume_Max_chronic",
+            "MonocytesPercentage_Avg_chronic",
+            "MonocytesPercentage_Max_acute",
+            "MeanCorpuscularVolume_Max_chronic"
+        ]
+    },
+    {
+        "label": "55+",
+        "n": 15,
+        "top_n": [
+            "PlateletCount_Min_chronic",
+            "NeutrophilsPercentage_Max_chronic",
+            "MeanPlateletVolume_Max_chronic",
+            "TotalThyroxine_Min_chronic",
+            "MeanCorpuscularHemoglobinConcentration_Max_chronic",
+            "Hematocrit_Max_chronic",
+            "CReactiveProtein_Avg_chronic",
+            "AbsoluteEosinophilCount_Avg_chronic",
+            "MeanCorpuscularVolume_Max_chronic",
+            "NeutrophilsPercentage_Avg_chronic",
+            "RedCellDistributionWidthCV_Max_chronic",
+            "MeanCorpuscularHemoglobin_Min_chronic",
+            "MeanPlateletVolume_Max_acute",
+            "ImmunoglobulinE_Min_chronic",
+            "BasophilsPercentage_Min_acute"
+        ]
+    },
+    {
+        "label": "6-12",
+        "n": 15,
+        "top_n": [
+            "MeanPlateletVolume_Max_chronic",
+            "ImmunoglobulinE_Min_chronic",
+            "MeanPlateletVolume_Min_acute",
+            "MeanCorpuscularHemoglobin_Max_chronic",
+            "ImmunoglobulinE_Max_chronic",
+            "EosinophilCountAbsolute_Max_chronic",
+            "MeanCorpuscularVolume_Max_acute",
+            "MeanPlateletVolume_Min_chronic",
+            "AbsoluteEosinophilCount_Min_acute",
+            "MeanCorpuscularVolume_Max_chronic",
+            "RedCellDistributionWidthCV_Max_chronic",
+            "AbsoluteEosinophilCount_Avg_acute",
+            "EosinophilCountAbsolute_Avg_chronic",
+            "NeutrophilsPercentage_Max_acute",
+            "EosinophilCountAbsolute_Min_acute"
+        ]
+    },
+    {
+        "label": "all",
+        "n": 15,
+        "top_n": [
+            "MeanCorpuscularVolume_Max_chronic",
+            "PlateletCount_Min_chronic",
+            "NeutrophilsPercentage_Avg_chronic",
+            "MeanCorpuscularVolume_Min_chronic",
+            "MeanCorpuscularHemoglobinConcentration_Min_chronic",
+            "MeanPlateletVolume_Max_chronic",
+            "ImmunoglobulinE_Min_chronic",
+            "MeanCorpuscularHemoglobinConcentration_Max_chronic",
+            "ProliferatingCellNuclearAntigen_Max_chronic",
+            "TotalTriiodothyronine_Min_chronic",
+            "MeanCorpuscularHemoglobin_Min_chronic",
+            "ImmunoglobulinE_Max_chronic",
+            "PlateletCount_Max_chronic",
+            "CReactiveProtein_Avg_chronic",
+            "Hematocrit_Max_chronic"
+        ]
+    }
+]
