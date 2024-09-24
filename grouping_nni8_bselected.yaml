@@ -10,7 +10,7 @@ train:
   target_column: 'VisitDuration'
   features_for_derivation:
   variable_selection_method: 'selection'
-  features_list: 'boruta_explog/6a7a1e15-b587-463c-897e-f85db2783322/confirmed_vars.txt'
+  features_list: 'boruta_explog/5ba609a3-33ca-4809-869a-004d915e1d74/confirmed_vars.txt'
   grouping_parameter_id: '1'
   groupingparams: 
     bins: [0, 2, 6, 12, 25, 55, 150]

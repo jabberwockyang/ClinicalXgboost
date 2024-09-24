@@ -1,4 +1,5 @@
-# todo  
+# todo 全部数据用作validation
+# 全部数据用作画图结果
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 import argparse
@@ -9,12 +10,14 @@ import json
 from loguru import logger
    
 from best_params import opendb, get_best_params
-from utils import preprocess_data, load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, sorted_features_list, load_feature_list_from_boruta_file
+from utils import load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, load_feature_list_from_boruta_file
 from preprocessor import Preprocessor, FeatureDrivator, FeatureFilter
 
 # 主函数
 def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
     paramcopy = params.copy()
+    modeltype = params.pop('model')
+    assert modeltype == 'xgboost', f"Model type {modeltype} not supported"
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     custom_metric_key = params.pop('custom_metric')
@@ -30,7 +33,8 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
             if os.path.exists(final_marker):
                 logger.info(f"Model already trained for {k}")
                 continue
-
+            if not os.path.exists(f'{log_dir}/{k}'):
+                os.makedirs(f'{log_dir}/{k}')
             X, y, sample_weight = preprocessor.preprocess(data,
                                                         scale_factor,
                                                         log_transform,
@@ -48,16 +52,15 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
                 logger.info(f"No data for {k}")
                 continue
             # 划分训练集 验证集 测试集
-            X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
-            X_train, X_val, y_train, y_val, sw_train, sw_val = train_test_split(X_train, y_train, sw_train, test_size=0.2, random_state=42)
-            
+            # X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
+            # X_train, X_val, y_train, y_val, sw_train, sw_val = train_test_split(X_train, y_train, sw_train, test_size=0.2, random_state=42)
+            X_train, X_val, y_train, y_val, sw_train, sw_val = train_test_split(X, y, sample_weight, test_size=0.5, random_state=42)
             dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
             dval = xgb.DMatrix(X_val, label=y_val, weight=sw_val)
-            dtest = xgb.DMatrix(X_test, label=y_test, weight=sw_test)
-            dplot = xgb.DMatrix(X, label=y, weight=sample_weight)
+            dtest = xgb.DMatrix(X, label=y, weight=sample_weight)
 
             # 提取 custom_metric 字段 替换为自定义的评估函数
-            custom_metric = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None
+            custom_metric, maximize = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None
 
             params["device"] = "cuda"
             params["tree_method"] = "hist"
@@ -67,7 +70,7 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
                             custom_metric = custom_metric,
                             evals = [(dtrain, 'train'), 
                                     (dval, 'validation')],
-                            maximize= True,
+                            maximize= maximize,
                             num_boost_round = num_boost_round,
                             early_stopping_rounds=early_stopping_rounds)
 
@@ -96,8 +99,6 @@ def main(filepath, preprocessor, log_dir, params, label_toTrain: List[str]):
             plot_feature_importance(model, result_dir)
             logger.info(f"Model result saved for {k}")
             
-
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Run XGBoost Model Training with Grouping Parameters')

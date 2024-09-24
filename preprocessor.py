@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import itertools
 from loguru import logger
-from utils import load_config
+
 
 
 def get_asso_feat(feat, featlist):
@@ -138,8 +138,8 @@ class FeatureFilter:
 
 class Preprocessor:
     def __init__(self, 
-                 target_column: str,
-                 groupingparams: Dict[str, List[str]],
+                 target_column: str = 'VisitDuration',
+                 groupingparams: Dict[str, List[str]] = {'bins': [0, 2, 6, 18, 55, 100], 'labels': ['0-2', '2-6', '6-18', '18-55', '55+']},
                  feature_reference: str = 'ExaminationItemClass_ID.json',
                  feature_derive: FeatureDrivator|None = None, 
                  FeaturFilter: FeatureFilter|None = None
@@ -169,6 +169,8 @@ class Preprocessor:
         df = df.dropna(subset= ['Gender','FirstVisitAge','VisitDuration','CIndU'], how='any', axis=0)
         df = df.dropna(subset = [self.target_column], how='any', axis=0)
         
+        # reset index
+        df = df.reset_index()
         # print the columns with NaN values
         logger.info(f"Columns with NaN values: {df.columns[df.isna().any()]}")
         # logger.debug(f"""
@@ -276,17 +278,32 @@ class Preprocessor:
     def _scalingY(self, df: pd.DataFrame, scale_factor, log_transform):
         # scale the Y data by scale_factor and log_transform
         logger.info(f"Scaling the Y data by scale_factor: {scale_factor} and log_transform: {log_transform}")
+        # logger.debug(f"Original Y data: {df[self.target_column][:25]} ...")
+
         df[self.target_column] = np.round(df[self.target_column] / scale_factor) + 1
-        if log_transform == "log2":
+        
+        if log_transform == "log2": # log and round to the nearest integer
             df[self.target_column] = np.log2(df[self.target_column])
         elif log_transform == "log10":
             df[self.target_column] = np.log10(df[self.target_column])
         else:
             pass
-        # logger.debug(f"""
-        #             {df.head()}
-        #              """)
+        # logger.debug(f"Scaled Y data: {df[self.target_column][:25]} ...")
         return df
+    
+    def reverse_scalingY(self, y: np.array, scale_factor, log_transform):
+        # reverse the scaling of Y data by scale_factor and log_transform
+        # logger.info(f"Reversing the scaling of Y data by scale_factor: {scale_factor} and log_transform: {log_transform}")
+        # logger.debug(f"Original Y data: {y[:25]} ...")
+        if log_transform == "log2":
+            y = 2 ** y
+        elif log_transform == "log10":
+            y = 10 ** y
+        else:
+            pass
+        y = (y - 1) * scale_factor
+        # logger.debug(f"Reversed Y data: {y[:25]} ...")
+        return y
     
     def preprocess(self, df: pd.DataFrame, 
                     scale_factor: int,
@@ -307,7 +324,6 @@ class Preprocessor:
 
         # scale the X data by min-max 
         df = self._scalingX(df)
-
         # scale the Y data by scale_factor and log_transform
         df = self._scalingY(df, scale_factor, log_transform)
 
@@ -336,13 +352,11 @@ if __name__ == "__main__":
 
     from sklearn.model_selection import train_test_split
     import xgboost as xgb
+    from utils import load_config
     df = pd.read_csv('output/dataforxgboost_ac.csv')
     groupingparams = load_config('groupingsetting.yml')['groupingparams']
     pp = Preprocessor(target_column='VisitDuration', groupingparams=groupingparams)
-    X, y, sample_weight = pp.preprocess(df, scale_factor=1, log_transform='log2', pick_key='55+', topn=10)
-    X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
-    print(type(X_train))
-    dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
-    print(X.head())
-    print(y.head())
-    print(sample_weight.head())
+    X, y, sample_weight = pp.preprocess(df, scale_factor=1, log_transform='log2', pick_key='all', topn=None)
+
+    reversed_y = pp.reverse_scalingY(y.values, scale_factor=1, log_transform='log2')
+

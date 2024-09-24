@@ -527,6 +527,7 @@ best_expid=kiGBxqL6
 best_db_path=nni7_explog/$best_expid/db/nni.sqlite
 python3 runboruta.py --filepath output/dataforxgboost.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
 ```
+Experiment name: 28ca5bf9-6014-4676-92b0-fc14ccff2dc8
 
 #### nni8 
 ```bash
@@ -538,10 +539,84 @@ best_expid=agAUczMO
 best_db_path=nni8_explog/$best_expid/db/nni.sqlite
 python3 runboruta.py --filepath output/dataforxgboost_ap.csv --best_db_path $best_db_path --target_column VisitDuration --log_dir boruta_explog --groupingparams groupingsetting.yml
 ```
+Experiment name: 5ba609a3-33ca-4809-869a-004d915e1d74
 
 ### rerun all grouping
 ```bash
-for yml in grouping_nni*.yaml; do 
+for yml in grouping_nni5*.yaml; do 
     python3 train_grouping.py --config "$yml"
 done
 ```
+
+240923 
+reconstruct code with svm and rf available in nni searchspace
+find error in reversing yscaling in evaluation within xgboost training
+nni5 results shows less negative point with 42 as binary threshold add 100 and 365 as binary threshold and take max of them to report the final result
+### rerun all nni
+
+
+#### nni7 based on avg min max of all records
+```bash 
+cp search_space_xgboost.json search_space.json
+nnictl create --config config_nni7.yml --port 7860
+nnictl resume Fyepnu5G --port 7860
+```
+The experiment id is Fyepnu5G
+![42roc](nni7_explog/Fyepnu5G/result/428/42_roc.png)
+![100roc](nni7_explog/Fyepnu5G/result/428/100_roc.png)
+![365roc](nni7_explog/Fyepnu5G/result/428/365_roc.png)
+
+```bash
+cp search_space_rf.json search_space.json
+nnictl create --config config_nni7.yml --port 8081
+nnictl resume 5BnrHsbC --port 8081
+```
+The experiment id is 5BnrHsbC
+![42roc](nni7_explog/5BnrHsbC/result/99/42_roc.png)
+![100roc](nni7_explog/5BnrHsbC/result/99/100_roc.png)
+![365roc](nni7_explog/5BnrHsbC/result/99/365_roc.png)
+
+```bash
+cp search_space_svm.json search_space.json
+nnictl create --config config_nni7.yml --port 8081
+
+```
+The experiment id is 5j2hasGx
+
+#### nni5 based on avg min max of acute and chronic records
+```bash
+cp search_space_xgboost.json search_space.json
+nnictl create --config config_nni5.yml --port 8081
+nnictl resume a6gA1Bip --port 8081
+```
+The experiment id is a6gA1Bip
+
+
+```bash
+cp search_space_rf.json search_space.json
+nnictl create --config config_nni5.yml --port 8081
+```
+
+
+#### nni6 based on avg min max of acute records
+```bash
+cp search_space_xgboost.json search_space.json
+nnictl create --config config_nni6.yml --port 7860
+nnictl resume  --port 8081
+```
+
+240924 
+find possible bug in tpe final report the 3 args
+```plain text
+
+Reports final result to NNI.
+
+metric should either be a float, or a dict that metric['default'] is a float.
+
+If metric is a dict, metric['default'] will be used by tuner, and other items can be visualized with web portal.
+
+Typically metric is the final accuracy or loss.
+```
+nothing
+
+goon

@@ -1,10 +1,12 @@
-# todo  topn
+# todo
 import nni
 import xgboost as xgb
+from sklearn.ensemble import RandomForestRegressor
+from sklearn import svm
+
 from sklearn.model_selection import train_test_split
 import argparse
 import os
-from typing import Dict, List
 import json
 from loguru import logger
 from utils import load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, load_config, load_feature_list_from_boruta_file
@@ -13,29 +15,22 @@ from preprocessor import Preprocessor, FeatureDrivator, FeatureFilter
 # 主函数
 def nnimain(filepath, log_dir, preprocessor: Preprocessor):
     # 从 NNI 获取超参数 
-    params = nni.get_next_parameter()
 
-    # Add GPU parameter
-    params["device"] = "cuda"
-    params["tree_method"] = "hist"
-    paramandreuslt = params.copy()
+    params = nni.get_next_parameter()
+    paramandreuslt = params.copy() # 备份超参数
+    # 从超参数中提取预处理参数
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
-    custom_metric_key = params.pop('custom_metric')
-    num_boost_round = params.pop('num_boost_round')
-    early_stopping_rounds = params.pop('early_stopping_rounds')
-    #pop topn parameter if no such key set to None
-    topn = params.pop('topn', None) # topn in search space can either be set as a list of int greater than 1 with -1 suggesting using all features or a float between 0 and 1 with 1 suggesting using all features 
+    topn = params.pop('topn', None) # pop topn parameter if no such key set to None # topn in search space can either be set as a list of int greater than 1 with -1 suggesting using all features or a float between 0 and 1 with 1 suggesting using all features 
 
     data = load_data(filepath)
-
     X, y, sample_weight = preprocessor.preprocess(data, 
                                                   scale_factor,
                                                   log_transform,
                                                   pick_key= 'all',
                                                   topn=topn)
     
-    # concat x and y save to the log_dir
+    # 备份数据
     Xy = X.copy()
     Xy['target'] = y
     experiment_id = nni.get_experiment_id()
@@ -44,22 +39,52 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
     # 划分训练集 验证集 测试集
     X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val, sw_train, sw_val = train_test_split(X_train, y_train, sw_train, test_size=0.2, random_state=42)
+
     
-    dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
-    dval = xgb.DMatrix(X_val, label=y_val, weight=sw_val)
-    dtest = xgb.DMatrix(X_test, label=y_test, weight=sw_test)
+    model_type = params.pop('model')
+    def train_model(model_type, params):
 
-    custom_metric = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None
+        if model_type == "xgboost":
+            # XGBoost 特有的 GPU 参数
+            params["device"] = "cuda"
+            params["tree_method"] = "hist"
 
-    # 训练模型
-    model = xgb.train(params, 
-                      dtrain, 
-                      custom_metric = custom_metric,
-                      evals = [(dtrain, 'train'), 
-                               (dval, 'validation')],
-                      maximize= True,
-                      num_boost_round = num_boost_round,
-                      early_stopping_rounds=early_stopping_rounds)
+            custom_metric_key = params.pop('custom_metric')
+            num_boost_round = params.pop('num_boost_round')
+            early_stopping_rounds = params.pop('early_stopping_rounds')
+
+            custom_metric, maximize = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None
+
+            xgb_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
+            # 构建 DMatrix
+            dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
+            dval = xgb.DMatrix(X_val, label=y_val, weight=sw_val)
+            # 训练 XGBoost 模型，传入早停参数
+            model = xgb.train(xgb_params, 
+                            dtrain, 
+                            custom_metric=custom_metric,
+                            evals=[(dtrain, 'train'), 
+                                   (dval, 'validation')],
+                            maximize=maximize,
+                            num_boost_round=num_boost_round,
+                            early_stopping_rounds=early_stopping_rounds)
+
+        elif model_type == "svm":
+            svm_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
+            model = svm.SVR(**svm_params)
+            model.fit(X_train, y_train, sample_weight=sw_train)
+
+        elif model_type == "random_forest":
+            rf_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
+            model = RandomForestRegressor(**rf_params)
+            model.fit(X_train, y_train, sample_weight=sw_train)
+
+        else:
+            raise ValueError(f"Unsupported model type: {model_type}")
+        
+        return model
+
+    model = train_model(model_type, params)
 
     # 获取当前的超参数配置ID 获取当前的实验ID
     sequence_id = nni.get_sequence_id()
@@ -67,13 +92,14 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
     
     # 保存模型checkpoint
     checkpoint_path = f'{log_dir}/{experiment_id}/checkpoint/{sequence_id}_model_checkpoint.json'
-    save_checkpoint(model, checkpoint_path)
+    save_checkpoint(model_type, model, checkpoint_path)
 
     # 保存模型结果
     result_dir = f'{log_dir}/{experiment_id}/result/{sequence_id}'
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
-    loss, max_roc_auc, max_prerec_auc = evaluate_model(model, dtest, result_dir, scale_factor, log_transform)
+    loss, max_roc_auc, max_prerec_auc = evaluate_model(model, model_type, X_test, y_test, sw_test,
+                                                       result_dir, scale_factor, log_transform)
     # 保存实验 id 超参数 和 结果 # 逐行写入
     paramandreuslt['loss'] = loss
     paramandreuslt['max_roc_auc'] = max_roc_auc
@@ -84,7 +110,10 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
         f.write('\n')
 
     # 评估特征重要性
-    plot_feature_importance(model, result_dir)
+    if model_type == "xgboost":
+        plot_feature_importance(model, result_dir)
+    else:
+        pass
     # 向 NNI 报告结果
     nni.report_final_result({
         'default': loss,
