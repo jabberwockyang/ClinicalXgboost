@@ -175,7 +175,12 @@ class Preprocessor:
         # logger.debug(f"""
         #             {df.head()}
         #              """)
-        return df
+        # average missing values percentage in all rows
+        avg_missing_perc_row = df.isna().mean().mean()
+        # average missing values percentage in all columns
+        avg_missing_perc_col = df.isna().mean().mean(axis=1)
+
+        return df, avg_missing_perc_row, avg_missing_perc_col
     
     def _imputation(self, df: pd.DataFrame):
         logger.info(f"Imputing missing values")
@@ -312,7 +317,7 @@ class Preprocessor:
                     pick_key = '0-2',
                     topn: int|float|None = None):
         # dropna
-        df = self._dropna(df, row_na_threshold, col_na_threshold)
+        df, avg_missing_perc_row, avg_missing_perc_col = self._dropna(df, row_na_threshold, col_na_threshold)
 
         # Missing value imputation
         df = self._imputation(df)
@@ -347,7 +352,7 @@ class Preprocessor:
         logger.info(f"NaN in X: {X.isna().sum().sum()}")
         logger.info(f"NaN in y: {y.isna().sum()}")
         logger.info(f"NaN in sample_weight: {sample_weight.isna().sum()}")
-        return X, y, sample_weight
+        return X, y, sample_weight, avg_missing_perc_row, avg_missing_perc_col
 
 if __name__ == "__main__":
 

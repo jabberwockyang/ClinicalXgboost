@@ -19,39 +19,68 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor, n_splits=5):
     # 从 NNI 获取超参数 
 
     params = nni.get_next_parameter()
-    paramandreuslt = params.copy() # 备份超参数
+    sequence_id = nni.get_sequence_id()
+    experiment_id = nni.get_experiment_id()
+
+    hyperparameters = {
+        "sequence_id": sequence_id,
+        "params": params
+    }
+    with open(f'{log_dir}/{experiment_id}/hyperparameters.jsonl', 'a') as f:
+        json.dump(convert_floats(hyperparameters), f, ensure_ascii=False)
+        f.write('\n')
+    
     # 从超参数中提取预处理参数
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
-    topn = params.pop('topn', None) # pop topn parameter if no such key set to None # topn in search space can either be set as a list of int greater than 1 with -1 suggesting using all features or a float between 0 and 1 with 1 suggesting using all features 
-    model_type = params.pop('model')
+    row_na_threshold = params.pop('row_na_threshold') # 用于删除缺失值过多的行
+    col_na_threshold = params.pop('col_na_threshold') # 用于删除缺失值过多的列
 
+    topn = params.pop('topn', None) # pop topn parameter if no such key set to None # topn in search space can either be set as a list of int greater than 1 with -1 suggesting using all features or a float between 0 and 1 with 1 suggesting using all features 
+    # 加载数据
     data = load_data(filepath)
-    X, y, sample_weight = preprocessor.preprocess(data, 
-                                                  scale_factor,
-                                                  log_transform,
-                                                  pick_key= 'all',
-                                                  topn=topn)
+    # 预处理数据
+    X, y, sample_weight, avg_missing_perc_row, avg_missing_perc_col = preprocessor.preprocess(data, 
+                                                                            scale_factor,
+                                                                            log_transform,
+                                                                                row_na_threshold,
+                                                                                col_na_threshold,
+                                                                            pick_key= 'all',
+                                                                            topn=topn)
     
     # 备份数据
     Xy = X.copy()
     Xy['target'] = y
-    experiment_id = nni.get_experiment_id()
     Xy.to_csv(f'{log_dir}/{experiment_id}/datapreprocessed.csv', index=False)
+    ppshape = {
+        "sequence_id" : sequence_id,
+        'pp_params':{'row_na_threshold': row_na_threshold, 'col_na_threshold': col_na_threshold},
+        'ppresults':{
+            'shape': [Xy.shape[0], Xy.shape[1]],
+            'avg_missing_perc_row': avg_missing_perc_row,
+            'avg_missing_perc_col': avg_missing_perc_col
+        }
+    }
+    # 预处理结果保存
+    with open(f'{log_dir}/{experiment_id}/ppshape.jsonl', 'a') as f:
+        json.dump(convert_floats(ppshape), f, ensure_ascii=False)
+        f.write('\n')
 
-    # external test set
-    X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.3, random_state=42)   
     
+    # external test set split
+    X_deriva, X_test_ext, y_deriva, y_test_ext, sw_deriva, sw_test_ext = train_test_split(X, y, sample_weight, test_size=0.3, random_state=42)   
+    
+    model_type = params.pop('model')
     # 初始化 KFold
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
     fold_results = []
     fold = 1
-
+    
     # k fold cross validation internal test set
-    for train_index, val_index in kf.split(X_train):
-        X_train_int, X_val = X_train.iloc[train_index], X_train.iloc[val_index]
-        y_train_int, y_val = y_train.iloc[train_index], y_train.iloc[val_index]
-        sw_train_int, sw_val = sw_train.iloc[train_index], sw_train.iloc[val_index]
+    for train_index, val_index in kf.split(X_deriva):
+        X_train_int, X_val = X_deriva.iloc[train_index], X_deriva.iloc[val_index]
+        y_train_int, y_val = y_deriva.iloc[train_index], y_deriva.iloc[val_index]
+        sw_train_int, sw_val = sw_deriva.iloc[train_index], sw_deriva.iloc[val_index]
         
         def train_model(model_type, params):
             if model_type == "xgboost":
@@ -82,12 +111,12 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor, n_splits=5):
             elif model_type == "svm":
                 svm_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
                 model = svm.SVR(**svm_params)
-                model.fit(X_train, y_train, sample_weight=sw_train)
+                model.fit(X_train_int, y_train_int, sample_weight=sw_train_int)
 
             elif model_type == "random_forest":
                 rf_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
                 model = RandomForestRegressor(**rf_params)
-                model.fit(X_train, y_train, sample_weight=sw_train)
+                model.fit(X_train_int, y_train_int, sample_weight=sw_train_int)
 
             else:
                 raise ValueError(f"Unsupported model type: {model_type}")
@@ -96,47 +125,42 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor, n_splits=5):
 
         model = train_model(model_type, params.copy())  # 传入超参数
 
-        # 获取当前的超参数配置ID 获取当前的实验ID
-        sequence_id = nni.get_sequence_id()
-        experiment_id = nni.get_experiment_id()
-
-        loss, max_roc_auc, max_prerec_auc = evaluate_model(model, model_type, X_test, y_test, sw_test,
+        loss, roc_auc_json, prerec_auc_json= evaluate_model(model, model_type, X_val, y_val, sw_val,
                                                         scale_factor, log_transform)
         fold_results.append({
             'fold': fold,
             'loss': loss,
-            'max_roc_auc': max_roc_auc,
-            'max_prerec_auc': max_prerec_auc
+            'roc_auc_json': roc_auc_json,
+            'avg_roc_auc': np.mean([roc_obj["roc_auc"] for roc_obj in roc_auc_json]),
+            'roc_auc_42': [roc_obj for roc_obj in roc_auc_json if roc_obj["binary_threshold"] == 42][0],
+            'prerec_auc_json': prerec_auc_json,
+            'avg_prerec_auc': np.mean([prerec_obj["prerec_auc"] for prerec_obj in prerec_auc_json]),
+            'prerec_auc_42': [prerec_obj for prerec_obj in prerec_auc_json if prerec_obj["binary_threshold"] == 42][0]
         })
         fold += 1
     
     avg_loss = np.mean([result['loss'] for result in fold_results])
-    avg_roc_auc = np.mean([result['max_roc_auc'] for result in fold_results])
-    avg_prerec_auc = np.mean([result['max_prerec_auc'] for result in fold_results])
+    avg_42_roc_auc = np.mean([result['roc_auc_42'] for result in fold_results])
+    avg_100_roc_auc = np.mean([result['roc_auc_json'] for result in fold_results])
+
 
     
     # 保存实验 id 超参数 和 结果 # 逐行写入
-    paramandreuslt['loss'] = avg_loss
-    paramandreuslt['loss_list'] = [result['loss'] for result in fold_results]
+    result = {
+        'sequence_id': sequence_id,
+        'fold_results': fold_results
+    }
 
-    paramandreuslt['max_roc_auc'] = avg_roc_auc
-    paramandreuslt['roc_auc_list'] = [result['max_roc_auc'] for result in fold_results]
-
-    paramandreuslt['max_prerec_auc'] = avg_prerec_auc
-    paramandreuslt['prerec_auc_list'] = [result['max_prerec_auc'] for result in fold_results]
-    
-    paramandreuslt['sequence_id'] = sequence_id
-
-    with open(f'{log_dir}/{experiment_id}/paramandresult.jsonl', 'a') as f:
-        json.dump(convert_floats(paramandreuslt), f, ensure_ascii=False)
+    with open(f'{log_dir}/{experiment_id}/results.jsonl', 'a') as f:
+        json.dump(convert_floats(result), f, ensure_ascii=False)
         f.write('\n')
 
     # 向 NNI 报告结果
     nni.report_final_result({
-        'default': avg_loss,
+        'default': avg_42_roc_auc,
         'loss': avg_loss,
-        'roc_auc': avg_roc_auc,
-        'prerec_auc': avg_prerec_auc
+        'avg_42_roc_auc' : avg_42_roc_auc,
+        'avg_100_roc_auc' : avg_100_roc_auc
     })
 
 
@@ -191,4 +215,4 @@ if __name__ == "__main__":
                       feature_derive=fd,
                       FeaturFilter=ff)
     # 运行主函数
-    nnimain(filepath, log_dir, pp)
+    nnimain(filepath, log_dir, pp, n_splits=5)

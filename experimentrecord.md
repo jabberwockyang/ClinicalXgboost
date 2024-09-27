@@ -810,6 +810,13 @@ nnictl create --config config_nni8.yml --port 8081
 sql: mysql/SQLquery/sql/dataforxgboost_timeseries_2024-09-27.sql
 
 nni 训练
+一个数据 三个模型
+```bash
+cd ~/ClinicalXgboost
+cp search_space_xgboost.json search_space.json
+
+```
+
 每个超参数配置
 - 过 preprocessor 
     - 存一个 preprocesseddata.csv

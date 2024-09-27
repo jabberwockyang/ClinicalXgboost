@@ -242,12 +242,14 @@ def prerec_auc_metric(y_test, y_pred):
         y_test_binary = np.where(y_test.copy() > binary_threshold, 1, 0)
         prec, rec, thresholds = precision_recall_curve(y_test_binary, y_pred) 
         prerec_auc = auc(rec, prec)
+        f1 = 2 * (prec * rec) / (prec + rec)
         auc_list.append(
             {"binary_threshold": binary_threshold,
             "precision": prec,
             "recall": rec,
             "thresholds": thresholds,
-            "prerec_auc": prerec_auc})
+            "prerec_auc": prerec_auc,
+            "f1": f1})
     return auc_list
 
 # 自定义评估函数2
@@ -256,11 +258,15 @@ def roc_auc_metric(y_test, y_pred):
     for binary_threshold in [42, 100, 365]:
         y_test_binary = np.where(y_test.copy() > binary_threshold, 1, 0)
         fpr, tpr, thresholds = roc_curve(y_test_binary, y_pred)
+        specifity = 1 - fpr
+        sensitivity = tpr
         roc_auc = auc(fpr, tpr)
         auc_list.append(
             {"binary_threshold": binary_threshold,
             "fpr": fpr,
             "tpr": tpr,
+            "specifity": specifity,
+            "sensitivity": sensitivity,
             "thresholds": thresholds,
             "roc_auc": roc_auc})
     return auc_list
@@ -291,13 +297,13 @@ def evaluate_model(model, model_type, X_test, y_test, sw_test,
 
     # roc auc
     roc_auc_json = roc_auc_metric(y_test_reversed, y_pred_reversed)
-    max_roc_auc = max([roc_obj["roc_auc"] for roc_obj in roc_auc_json])
-
+   
     # prerec auc
     prerec_auc_json = prerec_auc_metric(y_test_reversed, y_pred_reversed)
-    max_prerec_auc = max([prerec_obj["prerec_auc"] for prerec_obj in prerec_auc_json])
+    
+    return loss, roc_auc_json, prerec_auc_json
 
-
+def plot_auc():
     # save plot
     # for item in roc_auc_json:
     #     binary_threshold = item["binary_threshold"]
@@ -316,10 +322,7 @@ def evaluate_model(model, model_type, X_test, y_test, sw_test,
 
     #     save_path = os.path.join(result_dir, f'{binary_threshold}_prc.png')
     #     plot_prc_curve(rec, prec, prerec_auc, savepath=save_path)
-
-    return loss, max_roc_auc, max_prerec_auc
-
-
+    pass
 def evaluate_model_with_kfold(model, model_type, X, y, sw, 
                               scale_factor, log_transform, n_splits=5):
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
@@ -330,13 +333,13 @@ def evaluate_model_with_kfold(model, model_type, X, y, sw,
         y_train, y_val = y.iloc[train_index], y.iloc[val_index]
         sw_train, sw_val = sw.iloc[train_index], sw.iloc[val_index]
 
-        loss, max_roc_auc, max_prerec_auc = evaluate_model(model, model_type, X_val, y_val, sw_val,
+        loss, avg_roc_auc, avg_prerec_auc = evaluate_model(model, model_type, X_val, y_val, sw_val,
                                                             scale_factor, log_transform)
         fold_results.append({
             'fold': fold,
             'loss': loss,
-            'max_roc_auc': max_roc_auc,
-            'max_prerec_auc': max_prerec_auc
+            'avg_roc_auc': avg_roc_auc,
+            'avg_prerec_auc': avg_prerec_auc
         })
         fold += 1
 
@@ -372,8 +375,8 @@ def custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform):
             y_pred_reversed = reverse_y_scaling(y_pred, scale_factor, log_transform)
 
             auc_json = prerec_auc_metric(y_train_reversed, y_pred_reversed)
-            max_prerec_auc = max([auc_obj['prerec_auc'] for auc_obj in auc_json])
-            return 'prerec_auc', max_prerec_auc
+            avg_prerec_auc = np.mean([auc_obj['prerec_auc'] for auc_obj in auc_json])
+            return 'prerec_auc', avg_prerec_auc
         return custom_eval_prerec_auc, True
     elif custom_metric_key == 'roc_auc':
         # 用于传入 train_model 的自定义评估函数2
@@ -389,8 +392,8 @@ def custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform):
             y_pred_reversed = reverse_y_scaling(y_pred, scale_factor, log_transform)
 
             auc_json = roc_auc_metric(y_train_reversed, y_pred_reversed)
-            max_roc_auc = max(auc_obj['roc_auc'] for auc_obj in auc_json)
-            return 'roc_auc', max_roc_auc
+            avg_roc_auc = np.mean(auc_obj['roc_auc'] for auc_obj in auc_json)
+            return 'roc_auc', avg_roc_auc
         return custom_eval_roc_auc, True
     
     elif  custom_metric_key == None or custom_metric_key == 'default':
@@ -423,7 +426,7 @@ def parse_gr_results(grdir):
             # Append each result as a dictionary to the list
             results_list.append({
                 'group': results.get('group', ''),
-                'max_roc_auc': results.get('max_roc_auc', 0)
+                'avg_roc_auc': results.get('avg_roc_auc', 0)
             })
     
     # Create DataFrame from the list of dictionaries
@@ -433,20 +436,20 @@ def parse_gr_results(grdir):
 def parse_nni_results(nni_results, metric:str, minimize:bool, number_of_trials:int):
     '''
     input: jsonfile path
-    output: dataframe with max_roc_auc and group
+    output: dataframe with avg_roc_auc and group
 
     '''
     if metric == 'default':
         metric = 'loss'
     if metric == 'roc_auc':
-        metric = 'max_roc_auc'
+        metric = 'avg_roc_auc'
     if metric == 'prerec_auc':
-        metric = 'max_prerec_auc'
+        metric = 'avg_prerec_auc'
         
     with open(nni_results, 'r') as f:
         results = [json.loads(line) for line in f.readlines()]
     df = pd.DataFrame({
-    'max_roc_auc': [r['max_roc_auc'] for r in results],
+    'avg_roc_auc': [r['avg_roc_auc'] for r in results],
     'metric': [r[metric] for r in results],
     'group': ['all' for r in results],
     })
@@ -457,22 +460,22 @@ def parse_nni_results(nni_results, metric:str, minimize:bool, number_of_trials:i
 
 def plot_roc_summary(df, outdir):
 
-    # plot dot plot max_roc_auc in different group x axis is group y axis is max_roc_auc
+    # plot dot plot avg_roc_auc in different group x axis is group y axis is avg_roc_auc
     # different objective with different color
-    df['max_roc_auc'] = df['max_roc_auc'].astype(float)
+    df['avg_roc_auc'] = df['avg_roc_auc'].astype(float)
     uniquegroups = df['group'].unique() 
     orderedlist = sorted(uniquegroups, key = lambda x: int(re.split(r'[-+]', x)[0] if re.match(r'^\d', x) else 9999))
     df['group'] = pd.Categorical(df['group'], categories = orderedlist, ordered = True)
 
     plt.figure(figsize=(6, 5))
     # violinplot with dots  
-    sns.violinplot(data = df, x = 'group', y = 'max_roc_auc')
-    sns.stripplot(data = df, x = 'group', y = 'max_roc_auc', color = 'orange', size = 6, jitter = 0.25)
+    sns.violinplot(data = df, x = 'group', y = 'avg_roc_auc')
+    sns.stripplot(data = df, x = 'group', y = 'avg_roc_auc', color = 'orange', size = 6, jitter = 0.25)
     plt.xlabel('group')
-    plt.ylabel('max_roc_auc')
+    plt.ylabel('avg_roc_auc')
     plt.ylim(0.5, 1)
-    plt.title('max_roc_auc in different group')
-    plt.savefig(os.path.join(outdir, 'max_roc_auc.png'))
+    plt.title('avg_roc_auc in different group')
+    plt.savefig(os.path.join(outdir, 'avg_roc_auc.png'))
     plt.close()
 
 
