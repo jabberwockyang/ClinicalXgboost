@@ -9,11 +9,13 @@ import argparse
 import os
 import json
 from loguru import logger
-from utils import load_data, custom_eval_roc_auc_factory, save_checkpoint, evaluate_model, plot_feature_importance, convert_floats, load_config, load_feature_list_from_boruta_file
+from utils import load_data, custom_eval_roc_auc_factory, evaluate_model, convert_floats, load_config, load_feature_list_from_boruta_file
 from preprocessor import Preprocessor, FeatureDrivator, FeatureFilter
+from sklearn.model_selection import KFold
+import numpy as np
 
 # 主函数
-def nnimain(filepath, log_dir, preprocessor: Preprocessor):
+def nnimain(filepath, log_dir, preprocessor: Preprocessor, n_splits=5):
     # 从 NNI 获取超参数 
 
     params = nni.get_next_parameter()
@@ -22,6 +24,7 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
     scale_factor = params.pop('scale_factor') # 用于线性缩放目标变量
     log_transform = params.pop('log_transform') # 是否对目标变量进行对数变换
     topn = params.pop('topn', None) # pop topn parameter if no such key set to None # topn in search space can either be set as a list of int greater than 1 with -1 suggesting using all features or a float between 0 and 1 with 1 suggesting using all features 
+    model_type = params.pop('model')
 
     data = load_data(filepath)
     X, y, sample_weight = preprocessor.preprocess(data, 
@@ -36,89 +39,104 @@ def nnimain(filepath, log_dir, preprocessor: Preprocessor):
     experiment_id = nni.get_experiment_id()
     Xy.to_csv(f'{log_dir}/{experiment_id}/datapreprocessed.csv', index=False)
 
-    # 划分训练集 验证集 测试集
-    X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.2, random_state=42)
-    X_train, X_val, y_train, y_val, sw_train, sw_val = train_test_split(X_train, y_train, sw_train, test_size=0.2, random_state=42)
-
+    # external test set
+    X_train, X_test, y_train, y_test, sw_train, sw_test = train_test_split(X, y, sample_weight, test_size=0.3, random_state=42)   
     
-    model_type = params.pop('model')
-    def train_model(model_type, params):
+    # 初始化 KFold
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    fold_results = []
+    fold = 1
 
-        if model_type == "xgboost":
-            # XGBoost 特有的 GPU 参数
-            params["device"] = "cuda"
-            params["tree_method"] = "hist"
-
-            custom_metric_key = params.pop('custom_metric')
-            num_boost_round = params.pop('num_boost_round')
-            early_stopping_rounds = params.pop('early_stopping_rounds')
-
-            custom_metric, maximize = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None
-
-            xgb_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
-            # 构建 DMatrix
-            dtrain = xgb.DMatrix(X_train, label=y_train, weight=sw_train)
-            dval = xgb.DMatrix(X_val, label=y_val, weight=sw_val)
-            # 训练 XGBoost 模型，传入早停参数
-            model = xgb.train(xgb_params, 
-                            dtrain, 
-                            custom_metric=custom_metric,
-                            evals=[(dtrain, 'train'), 
-                                   (dval, 'validation')],
-                            maximize=maximize,
-                            num_boost_round=num_boost_round,
-                            early_stopping_rounds=early_stopping_rounds)
-
-        elif model_type == "svm":
-            svm_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
-            model = svm.SVR(**svm_params)
-            model.fit(X_train, y_train, sample_weight=sw_train)
-
-        elif model_type == "random_forest":
-            rf_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
-            model = RandomForestRegressor(**rf_params)
-            model.fit(X_train, y_train, sample_weight=sw_train)
-
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}")
+    # k fold cross validation internal test set
+    for train_index, val_index in kf.split(X_train):
+        X_train_int, X_val = X_train.iloc[train_index], X_train.iloc[val_index]
+        y_train_int, y_val = y_train.iloc[train_index], y_train.iloc[val_index]
+        sw_train_int, sw_val = sw_train.iloc[train_index], sw_train.iloc[val_index]
         
-        return model
+        def train_model(model_type, params):
+            if model_type == "xgboost":
+                # XGBoost 特有的 GPU 参数
+                params["device"] = "cuda"
+                params["tree_method"] = "hist"
 
-    model = train_model(model_type, params)
+                custom_metric_key = params.pop('custom_metric')
+                num_boost_round = params.pop('num_boost_round')
+                early_stopping_rounds = params.pop('early_stopping_rounds')
 
-    # 获取当前的超参数配置ID 获取当前的实验ID
-    sequence_id = nni.get_sequence_id()
-    experiment_id = nni.get_experiment_id()
+                custom_metric, maximize = custom_eval_roc_auc_factory(custom_metric_key, scale_factor, log_transform) # 'prerec_auc' 'roc_auc' None
+
+                xgb_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
+                # 构建 DMatrix
+                dtrain = xgb.DMatrix(X_train_int, label=y_train_int, weight=sw_train_int)
+                dval = xgb.DMatrix(X_val, label=y_val, weight=sw_val)
+                # 训练 XGBoost 模型，传入早停参数
+                model = xgb.train(xgb_params, 
+                                dtrain, 
+                                custom_metric=custom_metric,
+                                evals=[(dtrain, 'train'), 
+                                    (dval, 'validation')],
+                                maximize=maximize,
+                                num_boost_round=num_boost_round,
+                                early_stopping_rounds=early_stopping_rounds)
+
+            elif model_type == "svm":
+                svm_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
+                model = svm.SVR(**svm_params)
+                model.fit(X_train, y_train, sample_weight=sw_train)
+
+            elif model_type == "random_forest":
+                rf_params = {k: v for k, v in params.items() if v is not None}  # 去除 None
+                model = RandomForestRegressor(**rf_params)
+                model.fit(X_train, y_train, sample_weight=sw_train)
+
+            else:
+                raise ValueError(f"Unsupported model type: {model_type}")
+            
+            return model
+
+        model = train_model(model_type, params.copy())  # 传入超参数
+
+        # 获取当前的超参数配置ID 获取当前的实验ID
+        sequence_id = nni.get_sequence_id()
+        experiment_id = nni.get_experiment_id()
+
+        loss, max_roc_auc, max_prerec_auc = evaluate_model(model, model_type, X_test, y_test, sw_test,
+                                                        scale_factor, log_transform)
+        fold_results.append({
+            'fold': fold,
+            'loss': loss,
+            'max_roc_auc': max_roc_auc,
+            'max_prerec_auc': max_prerec_auc
+        })
+        fold += 1
     
-    # 保存模型checkpoint
-    checkpoint_path = f'{log_dir}/{experiment_id}/checkpoint/{sequence_id}_model_checkpoint.json'
-    save_checkpoint(model_type, model, checkpoint_path)
+    avg_loss = np.mean([result['loss'] for result in fold_results])
+    avg_roc_auc = np.mean([result['max_roc_auc'] for result in fold_results])
+    avg_prerec_auc = np.mean([result['max_prerec_auc'] for result in fold_results])
 
-    # 保存模型结果
-    result_dir = f'{log_dir}/{experiment_id}/result/{sequence_id}'
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
-    loss, max_roc_auc, max_prerec_auc = evaluate_model(model, model_type, X_test, y_test, sw_test,
-                                                       result_dir, scale_factor, log_transform)
+    
     # 保存实验 id 超参数 和 结果 # 逐行写入
-    paramandreuslt['loss'] = loss
-    paramandreuslt['max_roc_auc'] = max_roc_auc
-    paramandreuslt['max_prerec_auc'] = max_prerec_auc
+    paramandreuslt['loss'] = avg_loss
+    paramandreuslt['loss_list'] = [result['loss'] for result in fold_results]
+
+    paramandreuslt['max_roc_auc'] = avg_roc_auc
+    paramandreuslt['roc_auc_list'] = [result['max_roc_auc'] for result in fold_results]
+
+    paramandreuslt['max_prerec_auc'] = avg_prerec_auc
+    paramandreuslt['prerec_auc_list'] = [result['max_prerec_auc'] for result in fold_results]
+    
     paramandreuslt['sequence_id'] = sequence_id
+
     with open(f'{log_dir}/{experiment_id}/paramandresult.jsonl', 'a') as f:
         json.dump(convert_floats(paramandreuslt), f, ensure_ascii=False)
         f.write('\n')
 
-    # 评估特征重要性
-    if model_type == "xgboost":
-        plot_feature_importance(model, result_dir)
-    else:
-        pass
     # 向 NNI 报告结果
     nni.report_final_result({
-        'default': loss,
-        'roc_auc': max_roc_auc,
-        'prerec_auc': max_prerec_auc
+        'default': avg_loss,
+        'loss': avg_loss,
+        'roc_auc': avg_roc_auc,
+        'prerec_auc': avg_prerec_auc
     })
 
 

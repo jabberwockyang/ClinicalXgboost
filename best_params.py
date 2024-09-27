@@ -77,10 +77,10 @@ def get_best_params(df, metric_to_optimize:list=[('roc_auc',"maximize")], number
     return best_parameter_id_list
 
 if __name__ == '__main__':
-    db_path = '/root/project_240828/nni1_explog/ZpoUyrIC/db/nni.sqlite'
+    db_path = '/root/ClinicalXgboost/nni5_explog/8Y9XvkQq/db/nni.sqlite'
     df = opendb(db_path)
     list_of_tuple = get_best_params(df, 
-                                    metric_to_optimize=[('default',"minimize")], 
+                                    metric_to_optimize=[('roc_auc',"maximize")], 
                                     number_of_trials = 1)
     for i in list_of_tuple:
         print(i[0])

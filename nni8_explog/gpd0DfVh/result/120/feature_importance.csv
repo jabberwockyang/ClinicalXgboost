@@ -1,0 +1,3 @@
+weight,total_gain,total_cover,gain,cover,feature
+1.0,10.114221572875977,830.52734375,10.114221572875977,830.52734375,MeanCorpuscularHemoglobin_Max_acute
+1.0,10.342184066772461,826.305908203125,10.342184066772461,826.305908203125,MeanCorpuscularHemoglobin_Min_acute

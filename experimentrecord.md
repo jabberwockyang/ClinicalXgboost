@@ -541,14 +541,67 @@ python3 runboruta.py --filepath output/dataforxgboost_ap.csv --best_db_path $bes
 ```
 Experiment name: 5ba609a3-33ca-4809-869a-004d915e1d74
 
-### rerun all grouping
+### rerun all grouping importance
 ```bash
 for yml in grouping_nni5*.yaml; do 
     python3 train_grouping.py --config "$yml"
 done
 ```
 
-240923 
+```bash
+for expid in nni5_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --grdir "$grfolder"
+    done
+done
+```
+
+```bash
+for yml in grouping_nni6*.yaml; do 
+    python3 train_grouping.py --config "$yml"
+done
+```
+```bash
+for expid in nni6_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --grdir "$grfolder"
+    done
+done
+```
+
+```bash
+for yml in grouping_nni7*.yaml; do 
+    python3 train_grouping.py --config "$yml"
+done
+```
+```bash
+for expid in nni7_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --grdir "$grfolder"
+    done
+done
+```
+
+```bash
+for yml in grouping_nni8*.yaml; do 
+    python3 train_grouping.py --config "$yml"
+done
+```
+```bash
+for expid in nni8_explog/*; do
+    base_expid=$(basename "$expid")  # Extract base experiment ID
+    for grfolder in gr_explog/${base_expid}*; do
+        python3 importance.py --grdir "$grfolder"
+    done
+done
+```
+
+
+## 240923 reconstruct code with svm and rf available in nni searchspace
+
 reconstruct code with svm and rf available in nni searchspace
 find error in reversing yscaling in evaluation within xgboost training
 nni5 results shows less negative point with 42 as binary threshold add 100 and 365 as binary threshold and take max of them to report the final result
@@ -584,26 +637,81 @@ nnictl create --config config_nni7.yml --port 8081
 The experiment id is 5j2hasGx
 
 #### nni5 based on avg min max of acute and chronic records
+
 ```bash
 cp search_space_xgboost.json search_space.json
 nnictl create --config config_nni5.yml --port 8081
-nnictl resume a6gA1Bip --port 8081
 ```
-The experiment id is a6gA1Bip
-
-
 ```bash
-cp search_space_rf.json search_space.json
+for expid in nni5_explog/*; do python3 importance.py --nnidir $expid --metric roc_auc --minimize False --number_of_trials 1; done
+```
+240923
+```bash
+cp search_space_xgboost.json search_space.json
+cp output/dataforxgboost_ac_2024-09-14.csv output/dataforxgboost_ac.csv
 nnictl create --config config_nni5.yml --port 8081
 ```
+The experiment id is a6gA1Bip finished
+best id 3512
+![42roc](nni5_explog/a6gA1Bip/result/3512/42_roc.png)
+![100roc](nni5_explog/a6gA1Bip/result/3512/100_roc.png)
+![365roc](nni5_explog/a6gA1Bip/result/3512/365_roc.png)
+
+240924
+```bash
+cp search_space_xgboost.json search_space.json
+cp output/dataforxgboost_ac_2024-09-24.csv output/dataforxgboost_ac.csv
+nnictl create --config config_nni5.yml --port 8081
+```
+The experiment id is e3VIHk1m finished
+best id 507
+![42roc](nni5_explog/e3VIHk1m/result/507/42_roc.png)
+![100roc](nni5_explog/e3VIHk1m/result/507/100_roc.png)
+![365roc](nni5_explog/e3VIHk1m/result/507/365_roc.png)
+
 
 
 #### nni6 based on avg min max of acute records
+##### xgboost
 ```bash
 cp search_space_xgboost.json search_space.json
 nnictl create --config config_nni6.yml --port 7860
-nnictl resume  --port 8081
 ```
+```bash
+for expid in nni6_explog/*; do python3 importance.py --nnidir $expid --metric roc_auc --minimize False --number_of_trials 1; done
+```
+The experiment id is 3bXuOPBQ finished 
+best id 401
+![42roc](nni6_explog/3bXuOPBQ/result/401/42_roc.png)
+![100roc](nni6_explog/3bXuOPBQ/result/401/100_roc.png)
+![365roc](nni6_explog/3bXuOPBQ/result/401/365_roc.png)
+
+
+new a: The experiment id is QNH5u2ST
+best id 32
+![42roc](nni6_explog/QNH5u2ST/result/32/42_roc.png)
+![100roc](nni6_explog/QNH5u2ST/result/32/100_roc.png)
+![365roc](nni6_explog/QNH5u2ST/result/32/365_roc.png)
+
+
+#### nni8 based on avg min max of acute and preclinical records
+##### xgboost
+```bash
+cp search_space_xgboost.json search_space.json
+nnictl create --config config_nni8.yml --port 8081
+```
+```bash
+for expid in nni8_explog/*; do python3 importance.py --nnidir $expid --metric roc_auc --minimize False --number_of_trials 1; done
+```
+
+The experiment id is gpd0DfVh  repeat htrx8Aep(deleted) xiLbhs1V (quote randomstate)
+best id 898
+![42roc](nni8_explog/gpd0DfVh/result/898/42_roc.png)
+![100roc](nni8_explog/gpd0DfVh/result/898/100_roc.png)
+![365roc](nni8_explog/gpd0DfVh/result/898/365_roc.png)
+
+new ap:The experiment id is Bo4S0FNf(deleted)  AOopRwcC(deleted) ZfLhMPY3 (quote randomstate)
+
 
 240924 
 find possible bug in tpe final report the 3 args
@@ -619,4 +727,109 @@ Typically metric is the final accuracy or loss.
 ```
 nothing
 
-goon
+go on
+
+found bug in disecting the data for xgboost rerun nni5 nni6 and nni8
+
+240925
+why getting strange results after change to the new df
+the problem is in random state 
+
+
+## 240925 add some more features in codes
+1. 5 fold cross validation
+2. more examination data total visit > 2
+
+### nni7
+#### xgboost 
+```bash
+cd ~/ClinicalXgboost
+cp search_space_xgboost.json search_space.json
+cp mysql/output-20240925/dataforxgboost_2024-09-25.csv output/dataforxgboost.csv
+nnictl create --config config_nni7.yml --port 7860
+```
+The experiment id is fcNqxBOy
+best id 39 0.78
+
+
+#### rf
+```bash
+cd ~/ClinicalXgboost
+cp search_space_rf.json search_space.json
+cp mysql/output-20240925/dataforxgboost_2024-09-25.csv output/dataforxgboost.csv
+nnictl create --config config_nni7.yml --port 8081
+```
+
+#### svm
+```bash
+cd ~/ClinicalXgboost
+cp search_space_svm.json search_space.json
+cp mysql/output-20240925/dataforxgboost_2024-09-25.csv output/dataforxgboost.csv
+nnictl create --config config_nni7.yml --port 8081
+```
+
+### nni5
+#### xgboost
+```bash
+cd ~/ClinicalXgboost
+cp search_space_xgboost.json search_space.json
+cp mysql/output-20240925/dataforxgboost_ac_2024-09-25.csv output/dataforxgboost_ac.csv
+nnictl create --config config_nni5.yml --port 8081
+```
+The experiment id is dnNrA0gl 0.66
+maximize roc 
+
+
+
+### nni6
+#### xgboost
+```bash
+cd ~/ClinicalXgboost
+cp search_space_xgboost.json search_space.json
+cp mysql/output-20240925/dataforxgboost_a_2024-09-25.csv output/dataforxgboost_a.csv
+nnictl create --config config_nni6.yml --port 8081
+```
+
+### nni8
+```bash
+cd ~/ClinicalXgboost
+cp search_space_xgboost.json search_space.json
+cp mysql/output-20240925/dataforxgboost_ap_2024-09-25.csv output/dataforxgboost_ap.csv
+nnictl create --config config_nni8.yml --port 8081
+```
+8TiIWMPx
+
+
+## 240927
+### new sqlquery to eliminate multi-collinearity and compilance filteration 
+
+### new nni strategies to involve preprocessing params such as dropna percentage of row and columns
+
+### new code structure and evaluation protocol + Shap explanation
+
+sql: mysql/SQLquery/sql/dataforxgboost_timeseries_2024-09-27.sql
+
+nni 训练
+每个超参数配置
+- 过 preprocessor 
+    - 存一个 preprocesseddata.csv
+    - jsonl 存 data shape 存 missing rate
+- 分 30% 外部验证 70% 开发集
+    - 存一个 外部验证.csv 开发集.csv
+- train [开发集内部 0.7 train 0.3 val] 明确最佳框架和超参数
+    - jsonl 存超参数 
+    - jsonl 存内部验证结果 [auc specificty sensitivity f1] * [42 100 365]
+    - jsonl 存开发集五倍交叉验证结果 [auc specificty sensitivity f1] * [42 100 365] * [5个模型]
+
+feature 缩减训练
+- 根据 top5 模型获得特征重要性【shap? weight?】
+- 根据特征重要性排序减少特征 查看模型表现
+
+外部验证
+
+shap验证
+- 全局解释
+    - 全年龄段数据训练全局解释
+    - 不同年龄段数据训练观察全局解释变化
+- 局部解释
+    - 

@@ -166,7 +166,7 @@ if __name__ == '__main__':
         outdir = os.path.join('VariablesImportance', os.path.basename(os.path.dirname(nnidir)),  f"{os.path.basename(nnidir)}_{args.metric}_top{args.number_of_trials}_fromnni")
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        m = 'minimize' if args.minimize else 'maximize'
+        m = 'minimize' if args.minimize == 'True' else 'maximize'
         df, labels = LoadDataFromNNI(nnidir, metric_to_optimize=[(args.metric, m)], number_of_trials=args.number_of_trials)
         rocdf = parse_nni_results(os.path.join(nnidir, 'paramandresult.jsonl'), args.metric, args.minimize, args.number_of_trials)
         plot_roc_summary(rocdf, outdir)

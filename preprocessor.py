@@ -151,19 +151,18 @@ class Preprocessor:
         self.feature_filter = FeaturFilter
 
 
-    def _dropna(self, df: pd.DataFrame):
+    def _dropna(self, df: pd.DataFrame,row_na_threshold: float = 0.5, col_na_threshold: float = 0.5):
         logger.info(f"Dropping NaN values")
         # dropna
 
         ## remove columns with only 1 unique value or all NaN
-        df = df.dropna(axis=1, how='all')
-        df = df.drop(columns=[col for col in df.columns if df[col].nunique() == 1])
+        df = df.dropna(axis=1, thresh= int(col_na_threshold * len(df)))
+        # df = df.drop(columns=[col for col in df.columns if df[col].nunique() == 1])
 
         ## remove rows with more than 50% NaN values in CommonBloodTest
-        namelist = [x[1] for x in self.ExaminationItemClass['CommonBloodTest']]
-        result_cols2 = df.columns[df.columns.str.contains("|".join(namelist))]
-        df = df.dropna(subset=result_cols2, thresh= len(result_cols2) // 2)
-
+        # namelist = [x[1] for x in self.ExaminationItemClass['CommonBloodTest']]
+        # result_cols2 = df.columns[df.columns.str.contains("|".join(namelist))]
+        df = df.dropna(axis=0, thresh= int(row_na_threshold * len(df.columns)))
 
         ## remove rows with any NaN values in Gender,FirstVisitAge,VisitDuration,CIndU
         df = df.dropna(subset= ['Gender','FirstVisitAge','VisitDuration','CIndU'], how='any', axis=0)
@@ -308,10 +307,12 @@ class Preprocessor:
     def preprocess(self, df: pd.DataFrame, 
                     scale_factor: int,
                     log_transform: str, 
+                    row_na_threshold: float = 0.5,
+                    col_na_threshold: float = 0.5,
                     pick_key = '0-2',
                     topn: int|float|None = None):
         # dropna
-        df = self._dropna(df)
+        df = self._dropna(df, row_na_threshold, col_na_threshold)
 
         # Missing value imputation
         df = self._imputation(df)

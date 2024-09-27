@@ -271,7 +271,7 @@ def reverse_y_scaling(y, scale_factor, log_transform):
 
 # 模型评估
 def evaluate_model(model, model_type, X_test, y_test, sw_test,
-                  result_dir, scale_factor, log_transform):
+                  scale_factor, log_transform):
     if model_type == "xgboost":
         dtest = xgb.DMatrix(X_test, label=y_test, weight=sw_test)
         y_pred = model.predict(dtest)
@@ -297,34 +297,49 @@ def evaluate_model(model, model_type, X_test, y_test, sw_test,
     prerec_auc_json = prerec_auc_metric(y_test_reversed, y_pred_reversed)
     max_prerec_auc = max([prerec_obj["prerec_auc"] for prerec_obj in prerec_auc_json])
 
-    # save result
-    auc_results = {
-        "roc_auc": roc_auc_json,
-        "prerec_auc": prerec_auc_json
-    }
-    with open(os.path.join(result_dir, 'auc_results.json'), 'w') as f:
-        json.dump(convert_floats(auc_results), f, ensure_ascii=False, indent=4)
 
     # save plot
-    for item in roc_auc_json:
-        binary_threshold = item["binary_threshold"]
-        fpr = item["fpr"]
-        tpr = item["tpr"]
-        roc_auc = item["roc_auc"]
+    # for item in roc_auc_json:
+    #     binary_threshold = item["binary_threshold"]
+    #     fpr = item["fpr"]
+    #     tpr = item["tpr"]
+    #     roc_auc = item["roc_auc"]
 
-        save_path = os.path.join(result_dir, f'{binary_threshold}_roc.png')
-        plot_roc_curve(fpr, tpr, roc_auc, savepath=save_path)
+    #     save_path = os.path.join(result_dir, f'{binary_threshold}_roc.png')
+    #     plot_roc_curve(fpr, tpr, roc_auc, savepath=save_path)
 
-    for item in prerec_auc_json:
-        binary_threshold = item["binary_threshold"]
-        prec = item["precision"]
-        rec = item["recall"]
-        prerec_auc = item["prerec_auc"]
+    # for item in prerec_auc_json:
+    #     binary_threshold = item["binary_threshold"]
+    #     prec = item["precision"]
+    #     rec = item["recall"]
+    #     prerec_auc = item["prerec_auc"]
 
-        save_path = os.path.join(result_dir, f'{binary_threshold}_prc.png')
-        plot_prc_curve(rec, prec, prerec_auc, savepath=save_path)
+    #     save_path = os.path.join(result_dir, f'{binary_threshold}_prc.png')
+    #     plot_prc_curve(rec, prec, prerec_auc, savepath=save_path)
 
     return loss, max_roc_auc, max_prerec_auc
+
+
+def evaluate_model_with_kfold(model, model_type, X, y, sw, 
+                              scale_factor, log_transform, n_splits=5):
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    fold_results = []
+    fold = 1
+    for train_index, val_index in kf.split(X):
+        X_train, X_val = X.iloc[train_index], X.iloc[val_index]
+        y_train, y_val = y.iloc[train_index], y.iloc[val_index]
+        sw_train, sw_val = sw.iloc[train_index], sw.iloc[val_index]
+
+        loss, max_roc_auc, max_prerec_auc = evaluate_model(model, model_type, X_val, y_val, sw_val,
+                                                            scale_factor, log_transform)
+        fold_results.append({
+            'fold': fold,
+            'loss': loss,
+            'max_roc_auc': max_roc_auc,
+            'max_prerec_auc': max_prerec_auc
+        })
+        fold += 1
+
 
 # 保存模型checkpoint
 def save_checkpoint(model_type, model, checkpoint_path):
@@ -423,6 +438,11 @@ def parse_nni_results(nni_results, metric:str, minimize:bool, number_of_trials:i
     '''
     if metric == 'default':
         metric = 'loss'
+    if metric == 'roc_auc':
+        metric = 'max_roc_auc'
+    if metric == 'prerec_auc':
+        metric = 'max_prerec_auc'
+        
     with open(nni_results, 'r') as f:
         results = [json.loads(line) for line in f.readlines()]
     df = pd.DataFrame({
