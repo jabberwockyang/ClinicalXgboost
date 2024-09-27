@@ -6,3 +6,4 @@
 /nni*_explog/*/checkpoint
 /gr_explog
 .vscode
+mysql/db/urticaria.db
