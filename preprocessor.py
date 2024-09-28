@@ -176,9 +176,9 @@ class Preprocessor:
         #             {df.head()}
         #              """)
         # average missing values percentage in all rows
-        avg_missing_perc_row = df.isna().mean().mean()
+        avg_missing_perc_row = df.isna().mean(axis=1).mean()
         # average missing values percentage in all columns
-        avg_missing_perc_col = df.isna().mean().mean(axis=1)
+        avg_missing_perc_col = df.isna().mean(axis=0).mean()
 
         return df, avg_missing_perc_row, avg_missing_perc_col
     

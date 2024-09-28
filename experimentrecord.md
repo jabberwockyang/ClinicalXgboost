@@ -809,13 +809,6 @@ nnictl create --config config_nni8.yml --port 8081
 
 sql: mysql/SQLquery/sql/dataforxgboost_timeseries_2024-09-27.sql
 
-nni 训练
-一个数据 三个模型
-```bash
-cd ~/ClinicalXgboost
-cp search_space_xgboost.json search_space.json
-
-```
 
 每个超参数配置
 - 过 preprocessor 
@@ -826,11 +819,15 @@ cp search_space_xgboost.json search_space.json
 - train [开发集内部 0.7 train 0.3 val] 明确最佳框架和超参数
     - jsonl 存超参数 
     - jsonl 存内部验证结果 [auc specificty sensitivity f1] * [42 100 365]
-    - jsonl 存开发集五倍交叉验证结果 [auc specificty sensitivity f1] * [42 100 365] * [5个模型]
 
-feature 缩减训练
-- 根据 top5 模型获得特征重要性【shap? weight?】
-- 根据特征重要性排序减少特征 查看模型表现
+load each框架  top25 最佳超参数配置
+    - jsonl 存开发集五倍交叉验证结果 [auc specificty sensitivity f1] * [42 100 365] * [5个模型]
+    - 开发集五倍交叉验证作图
+    - 获得each框架 最佳超参数配置
+
+load each框架 最佳超参数配置 
+    - run boruta [GENERATE TOPN VARIABLE FILES] # TODO IN RUN BORUTA
+    - RUN WITH SELECTION
 
 外部验证
 
@@ -840,3 +837,25 @@ shap验证
     - 不同年龄段数据训练观察全局解释变化
 - 局部解释
     - 
+
+
+# 240928
+
+## nni9
+xgboost
+```bash
+cd ~/ClinicalXgboost
+cp search_space_xgboost.json search_space.json
+cp /root/ClinicalXgboost/mysql/output-20240927/dataforxgboost_timeseries_2024-09-27.csv output/dataforxgboost_timeseries.csv
+nnictl create --config config_nni9.yml --port 8081
+
+```
+
+rf
+```bash
+cd ~/ClinicalXgboost
+cp search_space_rf.json search_space.json
+cp /root/ClinicalXgboost/mysql/output-20240927/dataforxgboost_timeseries_2024-09-27.csv output/dataforxgboost_timeseries.csv
+nnictl create --config config_nni9.yml --port 8081
+
+```

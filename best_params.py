@@ -76,6 +76,17 @@ def get_best_params(df, metric_to_optimize:list=[('roc_auc',"maximize")], number
     logger.info(f"top {number_of_trials} best params: {best_parameter_id_list[:5]}")
     return best_parameter_id_list
 
+def get_params_by_sequence_id(df, sequence_ids):
+    best_parameter_id_list = []
+    # 找到最优的参数
+    for sequence_id in sequence_ids:
+        param_rows = df[df['sequenceId'] == sequence_id]
+        params = param_rows['parameters'].iloc[0]
+        param_id = param_rows['parameter_id'].iloc[0]
+        best_parameter_id_list.append((param_id, params, [sequence_id]))
+    return best_parameter_id_list
+
+
 if __name__ == '__main__':
     db_path = '/root/ClinicalXgboost/nni5_explog/8Y9XvkQq/db/nni.sqlite'
     df = opendb(db_path)

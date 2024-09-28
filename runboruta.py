@@ -7,13 +7,14 @@ from sklearn.model_selection import train_test_split
 from boruta import BorutaPy
 import seaborn as sns
 from utils import load_data, load_config, augment_samples, load_feature_list_from_boruta_file
-from best_params import opendb, get_best_params
+from best_params import opendb, get_params_by_sequence_id
 from preprocessor import Preprocessor, FeatureDrivator
 from loguru import logger
 from concurrent.futures import ThreadPoolExecutor
 import queue
 import argparse
 import uuid
+import json
 
 class PoisonPill:
     pass
@@ -128,17 +129,31 @@ def plot_boruta_by_group(ranking_df, log_dir):
     
     plot_boruta(group_ranking_df, log_dir, name='boruta_by_group')
 
+def generate_topN_features(ranking_df, confirmed_vars_file, log_dir):
+    confirmed_vars = load_feature_list_from_boruta_file(confirmed_vars_file)
+    nvars = len(confirmed_vars)
+    numeric_ranking_df = ranking_df.apply(pd.to_numeric, errors='coerce')
+
+    median_values = numeric_ranking_df.median()
+    sorted_columns = median_values.sort_values().index
+    # rank confirmed vars by ranking_df
+    confirmed_vars = [f for f in sorted_columns if f in confirmed_vars]
+    for i in range(3, nvars, 3) + [nvars]:
+        topN_vars = confirmed_vars[:i]
+        with open(os.path.join(log_dir, f'top{i}_confirmed_vars.txt'), 'w') as f:
+            f.write('\n'.join(topN_vars))
+    
 
 def argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--filepath', type=str)
     parser.add_argument('--best_db_path', type=str)
+    parser.add_argument('--best_sequence_id', type=str)
     parser.add_argument('--max_iteration', type=int, default=50)
 
     parser.add_argument('--target_column', type=str, default='VisitDuration')
     parser.add_argument('--log_dir', type=str, default='boruta_explog')
     parser.add_argument('--groupingparams', type=str, default='groupingsetting.yml')
-    parser.add_argument('--features_for_derivation', type=str, default=None, help='a file with features for derivation')
     return parser.parse_args()
 
 
@@ -146,34 +161,28 @@ if __name__ == "__main__":
     args = argparser()
     filepath = args.filepath
     target_column = args.target_column
+    groupingparams = load_config(args.groupingparams)['groupingparams']
     log_dir = args.log_dir
     # generate unique experiment name
-    experiment_name = str(uuid.uuid4())
+    experiment_name = str(uuid.uuid4()).split('-')[0]
     logger.info(f"Experiment name: {experiment_name}")
     log_dir = os.path.join(log_dir, experiment_name)
     os.makedirs(log_dir, exist_ok=True)
     # save copy of args
-    with open(os.path.join(log_dir, 'args.txt'), 'w') as f:
-        f.write(str(args))
+    with open(os.path.join(log_dir, 'args.json'), 'w') as f:
+        json.dump(vars(args), f, ensure_ascii=False,indent=4)
 
-    groupingparams = load_config(args.groupingparams)['groupingparams']
-
-    best_db_path = args.best_db_path
-    df  = opendb(best_db_path)
-    ls_of_params = get_best_params(df, [('default','minimize')], 1)
-    best_param = ls_of_params[0][1]
-    # save copy of best_param
-    with open(os.path.join(log_dir, 'best_param.txt'), 'w') as f:
-        f.write(str(best_param))
     
-    # 实例化特征衍生
-    features_for_deri = load_feature_list_from_boruta_file(args.features_for_derivation) if args.features_for_derivation else None
-    fd = FeatureDrivator(features_for_deri) if features_for_deri else None
+    df  = opendb(args.best_db_path)
+    best_param = get_params_by_sequence_id(df, args.best_sequence_id)
+    
+    # save copy of best_param
+    with open(os.path.join(log_dir, 'best_param.json'), 'w') as f:
+        json.dump(best_param, f, ensure_ascii=False,indent=4)
     
     # 实例化预处理器
     preprocessor = Preprocessor(target_column,
-                                 groupingparams,
-                                 feature_derive = fd)
+                                 groupingparams)
 
     max_iteration = args.max_iteration
     main(filepath, best_param, preprocessor, experiment_name, log_dir, max_iteration)
@@ -181,3 +190,5 @@ if __name__ == "__main__":
     ranking_df = pd.read_csv(os.path.join(log_dir, 'ranking_df.csv'))
     plot_boruta(ranking_df, log_dir)
     plot_boruta_by_group(ranking_df, log_dir)
+
+    generate_topN_features(ranking_df, os.path.join(log_dir, 'confirmed_vars.txt'), log_dir)
